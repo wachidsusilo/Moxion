@@ -1,0 +1,81 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moxion.Infrastructure.Kinematic", "Moxion.Infrastructure.Kinematic\Moxion.Infrastructure.Kinematic.csproj", "{6B31B540-E599-4F3E-ACA8-DD47697B70D3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moxion.Presentation.Web", "Moxion.Presentation.Web\Moxion.Presentation.Web.csproj", "{6BF25810-1078-41E8-B6FE-881DBC1AC5E6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moxion", "Moxion\Moxion.csproj", "{0D510303-2A99-4453-8A3C-A42ECDF2D3C6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moxion.Application", "Moxion.Application\Moxion.Application.csproj", "{D78CCCF1-9234-4C94-9B78-61C86F2B85C3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moxion.Infrastructure.Diagnostic", "Moxion.Infrastructure.Diagnostic\Moxion.Infrastructure.Diagnostic.csproj", "{6FE1A6FE-C48A-46F7-B36A-05BF24957147}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moxion.Presentation", "Moxion.Presentation\Moxion.Presentation.csproj", "{9DB31224-DC60-4BFD-B401-72F7BCBB396F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Application", "Application", "{D09E48B4-801D-4947-8EBD-07FDBC9F25D6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{F4AF7AC2-3FA5-424F-9B19-148092F50E19}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Presentation", "Presentation", "{2AF95443-9362-4D24-BAD3-2190D2E087BD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moxion.Application.Feature", "Moxion.Application.Feature\Moxion.Application.Feature.csproj", "{4D64BF1A-7F94-4468-B494-1A7F6CD43E20}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Domain", "Domain", "{3EDF3AE0-F150-45B3-A800-B814C961B9A5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moxion.CodeAnalysis", "Moxion.CodeAnalysis\Moxion.CodeAnalysis\Moxion.CodeAnalysis.csproj", "{46BF909B-D700-4A80-95DE-4B93802E1A68}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moxion.Tests", "Moxion.Tests\Moxion.Tests.csproj", "{C24C7608-03D5-4921-95CE-28F4183C692A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6B31B540-E599-4F3E-ACA8-DD47697B70D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B31B540-E599-4F3E-ACA8-DD47697B70D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B31B540-E599-4F3E-ACA8-DD47697B70D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B31B540-E599-4F3E-ACA8-DD47697B70D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6BF25810-1078-41E8-B6FE-881DBC1AC5E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BF25810-1078-41E8-B6FE-881DBC1AC5E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6BF25810-1078-41E8-B6FE-881DBC1AC5E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6BF25810-1078-41E8-B6FE-881DBC1AC5E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D510303-2A99-4453-8A3C-A42ECDF2D3C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D510303-2A99-4453-8A3C-A42ECDF2D3C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D510303-2A99-4453-8A3C-A42ECDF2D3C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D510303-2A99-4453-8A3C-A42ECDF2D3C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D78CCCF1-9234-4C94-9B78-61C86F2B85C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D78CCCF1-9234-4C94-9B78-61C86F2B85C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D78CCCF1-9234-4C94-9B78-61C86F2B85C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D78CCCF1-9234-4C94-9B78-61C86F2B85C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6FE1A6FE-C48A-46F7-B36A-05BF24957147}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6FE1A6FE-C48A-46F7-B36A-05BF24957147}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6FE1A6FE-C48A-46F7-B36A-05BF24957147}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6FE1A6FE-C48A-46F7-B36A-05BF24957147}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9DB31224-DC60-4BFD-B401-72F7BCBB396F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9DB31224-DC60-4BFD-B401-72F7BCBB396F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9DB31224-DC60-4BFD-B401-72F7BCBB396F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9DB31224-DC60-4BFD-B401-72F7BCBB396F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D64BF1A-7F94-4468-B494-1A7F6CD43E20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D64BF1A-7F94-4468-B494-1A7F6CD43E20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D64BF1A-7F94-4468-B494-1A7F6CD43E20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D64BF1A-7F94-4468-B494-1A7F6CD43E20}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46BF909B-D700-4A80-95DE-4B93802E1A68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46BF909B-D700-4A80-95DE-4B93802E1A68}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46BF909B-D700-4A80-95DE-4B93802E1A68}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46BF909B-D700-4A80-95DE-4B93802E1A68}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C24C7608-03D5-4921-95CE-28F4183C692A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C24C7608-03D5-4921-95CE-28F4183C692A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C24C7608-03D5-4921-95CE-28F4183C692A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C24C7608-03D5-4921-95CE-28F4183C692A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{D78CCCF1-9234-4C94-9B78-61C86F2B85C3} = {D09E48B4-801D-4947-8EBD-07FDBC9F25D6}
+		{9DB31224-DC60-4BFD-B401-72F7BCBB396F} = {2AF95443-9362-4D24-BAD3-2190D2E087BD}
+		{6BF25810-1078-41E8-B6FE-881DBC1AC5E6} = {2AF95443-9362-4D24-BAD3-2190D2E087BD}
+		{6B31B540-E599-4F3E-ACA8-DD47697B70D3} = {F4AF7AC2-3FA5-424F-9B19-148092F50E19}
+		{4D64BF1A-7F94-4468-B494-1A7F6CD43E20} = {D09E48B4-801D-4947-8EBD-07FDBC9F25D6}
+		{6FE1A6FE-C48A-46F7-B36A-05BF24957147} = {F4AF7AC2-3FA5-424F-9B19-148092F50E19}
+		{0D510303-2A99-4453-8A3C-A42ECDF2D3C6} = {3EDF3AE0-F150-45B3-A800-B814C961B9A5}
+	EndGlobalSection
+EndGlobal

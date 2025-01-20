@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="Moxion.Tests"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Moxion.CodeAnalysis\Moxion.CodeAnalysis\Moxion.CodeAnalysis.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="AutoMapper" Version="13.0.1"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Moxion.Application.Feature\Moxion.Application.Feature.csproj"/>
+        <ProjectReference Include="..\Moxion.Infrastructure.Diagnostic\Moxion.Infrastructure.Diagnostic.csproj"/>
+        <ProjectReference Include="..\Moxion.Infrastructure.Kinematic\Moxion.Infrastructure.Kinematic.csproj"/>
+        <ProjectReference Include="..\Moxion\Moxion.csproj"/>
+    </ItemGroup>
+
+</Project>

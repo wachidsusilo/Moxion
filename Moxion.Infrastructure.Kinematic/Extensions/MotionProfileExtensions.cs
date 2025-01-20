@@ -1,0 +1,49 @@
+﻿using Moxion.Common.Enumerations;
+using Moxion.Common.Values;
+using Moxion.Domain.Kinematic;
+
+namespace Moxion.Infrastructure.Kinematic.Extensions;
+
+internal static class MotionProfileExtensions
+{
+  public static Time CalculateDuration( this MotionProfile profile, Time time, MotionPhase phase )
+  {
+    return phase switch
+    {
+      MotionPhase.AccelerationWithPositiveJerk => time,
+      MotionPhase.ConstantAcceleration =>
+        time - CalculateTotalDuration( profile, MotionPhase.AccelerationWithPositiveJerk ),
+      MotionPhase.AccelerationWithNegativeJerk =>
+        time - CalculateTotalDuration( profile, MotionPhase.ConstantAcceleration ),
+      MotionPhase.ConstantVelocity =>
+        time - CalculateTotalDuration( profile, MotionPhase.AccelerationWithNegativeJerk ),
+      MotionPhase.DecelerationWithNegativeJerk =>
+        time - CalculateTotalDuration( profile, MotionPhase.ConstantVelocity ),
+      MotionPhase.ConstantDeceleration =>
+        time - CalculateTotalDuration( profile, MotionPhase.DecelerationWithNegativeJerk ),
+      _ => time - CalculateTotalDuration( profile, MotionPhase.ConstantDeceleration ),
+    };
+  }
+
+  public static Time CalculateTotalDuration( this MotionProfile profile, MotionPhase phase )
+  {
+    return phase switch
+    {
+      MotionPhase.AccelerationWithPositiveJerk => profile.JerkDuration,
+      MotionPhase.ConstantAcceleration => profile.JerkDuration + profile.AccelerationDuration,
+      MotionPhase.AccelerationWithNegativeJerk => 2 * profile.JerkDuration + profile.AccelerationDuration,
+      MotionPhase.ConstantVelocity => 2 * profile.JerkDuration
+                                      + profile.AccelerationDuration
+                                      + profile.SteadyMotionDuration,
+      MotionPhase.DecelerationWithNegativeJerk => 3 * profile.JerkDuration
+                                                  + profile.AccelerationDuration
+                                                  + profile.SteadyMotionDuration,
+      MotionPhase.ConstantDeceleration => 3 * profile.JerkDuration
+                                          + 2 * profile.AccelerationDuration
+                                          + profile.SteadyMotionDuration,
+      _ => 4 * profile.JerkDuration
+           + 2 * profile.AccelerationDuration
+           + profile.SteadyMotionDuration,
+    };
+  }
+}

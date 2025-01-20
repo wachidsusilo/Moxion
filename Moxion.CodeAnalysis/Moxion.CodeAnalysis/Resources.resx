@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<root>
+    <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <xsd:element name="root" msdata:IsDataSet="true">
+            
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="MX0001Title" xml:space="preserve">
+        <value>Default Logging Extensions Not Allowed</value>
+    </data>
+    <data name="MX0001Description" xml:space="preserve">
+        <value>Default logging methods like LogInformation, LogWarning, LogError must not be used. Use LogStart, LogCheckPoint, or LogEnd instead.</value>
+    </data>
+    <data name="MX0001MessageFormat" xml:space="preserve">
+        <value>Do not use '{0}', use 'LogStart', 'LogCheckPoint', or 'LogEnd'</value>
+    </data>
+    <data name="MX0002Title" xml:space="preserve">
+        <value>Multiple LogStart Calls Not Allowed</value>
+    </data>
+    <data name="MX0002Description" xml:space="preserve">
+        <value>This rule ensures that 'LogStart' is used only once in a method to avoid redundant logging at the beginning of method execution. Multiple calls to 'LogStart' within the same method could indicate improper logging practices or unnecessary duplication.</value>
+    </data>
+    <data name="MX0002MessageFormat" xml:space="preserve">
+        <value>The 'LogStart' method should appear at most once in a method</value>
+    </data>
+    <data name="MX0003Title" xml:space="preserve">
+        <value>LogStart must be paired with LogEnd</value>
+    </data>
+    <data name="MX0003Description" xml:space="preserve">
+        <value>'LogStart' must have exactly one 'LogEnd' call within the same method. Ensure that 'LogEnd' is called before any 'return' statements to maintain proper logging flow.</value>
+    </data>
+    <data name="MX0003MessageFormat" xml:space="preserve">
+        <value>'LogStart' must be paired with a corresponding 'LogEnd'</value>
+    </data>
+    <data name="MX0004Title" xml:space="preserve">
+        <value>LogStart must appear before LogEnd</value>
+    </data>
+    <data name="MX0004Description" xml:space="preserve">
+        <value>Ensures that LogStart is called before LogEnd in the same method.</value>
+    </data>
+    <data name="MX0004MessageFormat" xml:space="preserve">
+        <value>LogStart must be invoked before LogEnd</value>
+    </data>
+</root>

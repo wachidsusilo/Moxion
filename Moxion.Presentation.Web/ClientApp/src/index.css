@@ -1,0 +1,163 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+    font-family: 'Montserrat Alternates';
+    src: url('assets/fonts/montserrat_alternates_thin.ttf') format('truetype');
+    font-weight: 100;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Montserrat Alternates';
+    src: url('assets/fonts/montserrat_alternates_thin_italic.ttf') format('truetype');
+    font-weight: 100;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Montserrat Alternates';
+    src: url('assets/fonts/montserrat_alternates_extra_light.ttf') format('truetype');
+    font-weight: 200;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Montserrat Alternates';
+    src: url('assets/fonts/montserrat_alternates_extra_light_italic.ttf') format('truetype');
+    font-weight: 200;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Montserrat Alternates';
+    src: url('assets/fonts/montserrat_alternates_light.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Montserrat Alternates';
+    src: url('assets/fonts/montserrat_alternates_light_italic.ttf') format('truetype');
+    font-weight: 300;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Montserrat Alternates';
+    src: url('assets/fonts/montserrat_alternates_regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Montserrat Alternates';
+    src: url('assets/fonts/montserrat_alternates_italic.ttf') format('truetype');
+    font-weight: 400;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Montserrat Alternates';
+    src: url('assets/fonts/montserrat_alternates_medium.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Montserrat Alternates';
+    src: url('assets/fonts/montserrat_alternates_medium_italic.ttf') format('truetype');
+    font-weight: 500;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Montserrat Alternates';
+    src: url('assets/fonts/montserrat_alternates_semi_bold.ttf') format('truetype');
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Montserrat Alternates';
+    src: url('assets/fonts/montserrat_alternates_semi_bold_italic.ttf') format('truetype');
+    font-weight: 600;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Montserrat Alternates';
+    src: url('assets/fonts/montserrat_alternates_bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Montserrat Alternates';
+    src: url('assets/fonts/montserrat_alternates_bold_italic.ttf') format('truetype');
+    font-weight: 700;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Montserrat Alternates';
+    src: url('assets/fonts/montserrat_alternates_extra_bold.ttf') format('truetype');
+    font-weight: 800;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Montserrat Alternates';
+    src: url('assets/fonts/montserrat_alternates_extra_bold_italic.ttf') format('truetype');
+    font-weight: 800;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Montserrat Alternates';
+    src: url('assets/fonts/montserrat_alternates_black.ttf') format('truetype');
+    font-weight: 900;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Montserrat Alternates';
+    src: url('assets/fonts/montserrat_alternates_black_italic.ttf') format('truetype');
+    font-weight: 900;
+    font-style: italic;
+}
+
+@layer base {
+    * {
+        background: transparent;
+        outline: none;
+        box-shadow: none;
+    }
+
+    :root {
+        font-family: 'Montserrat Alternates', Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+        line-height: 1.5;
+        font-weight: 400;
+
+        width: 100%;
+        color: rgba(255, 255, 255, 0.87);
+        background-color: #0f1214;
+
+        font-synthesis: none;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+}
+
+@layer components {
+
+}
+
+@layer utilities {
+    .shrink-on-click {
+        @apply active:scale-95 transition;
+    }
+}
+
