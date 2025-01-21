@@ -1,0 +1,20 @@
+type ErrorCode =
+    'NoError'
+    | 'UnknownError'
+    | 'UnexpectedNullData'
+    | 'OperationCancelled'
+    | 'NegativeTimeResult'
+    | 'InvalidTime'
+    | 'InvalidPositionUnit'
+    | 'InvalidVelocityUnit'
+    | 'InvalidAccelerationUnit'
+    | 'InvalidJerkUnit'
+    | 'InvalidDataCount'
+    | 'InvalidSourcePositionUnit'
+    | 'InvalidDestinationPositionUnit'
+    | 'InvalidSourceTimeUnit'
+    | 'InvalidDestinationTimeUnit'
+    | 'InvalidSourceVolumeUnit'
+    | 'InvalidDestinationVolumeUnit'
+
+export default ErrorCode

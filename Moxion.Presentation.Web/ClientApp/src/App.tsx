@@ -1,9 +1,9 @@
-import Header from "./components/Header.tsx";
+import MotionSimulationPage from "./pages/MotionSimulationPage.tsx";
 
 function App() {
   return (
       <div className="flex w-full">
-          <Header className="" />
+          <MotionSimulationPage />
       </div>
   )
 }
