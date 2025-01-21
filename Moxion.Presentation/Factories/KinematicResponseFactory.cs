@@ -50,12 +50,12 @@ internal class KinematicResponseFactory : IKinematicResponseFactory
   {
     if (result.ErrorCode != ErrorCode.NoError)
     {
-      return new KinematicSimulateResponse( result.ErrorCode, null, null );
+      return new KinematicSimulateResponse( result.ErrorCode, null, null, null );
     }
 
     if (result.Profile is null || result.Data is null)
     {
-      return new KinematicSimulateResponse( ErrorCode.UnexpectedNullData, null, null );
+      return new KinematicSimulateResponse( ErrorCode.UnexpectedNullData, null, null, null );
     }
 
     var motionProfileResult = await _motionProfileFactory.Create(
@@ -67,7 +67,7 @@ internal class KinematicResponseFactory : IKinematicResponseFactory
 
     if (motionProfileResult.HasError)
     {
-      return new KinematicSimulateResponse( motionProfileResult.ErrorCode, null, null );
+      return new KinematicSimulateResponse( motionProfileResult.ErrorCode, null, null, null );
     }
 
     var motionDataResult = await _motionDataFactory.Create(
@@ -79,13 +79,14 @@ internal class KinematicResponseFactory : IKinematicResponseFactory
 
     if (motionDataResult.HasError)
     {
-      return new KinematicSimulateResponse( motionDataResult.ErrorCode, null, null );
+      return new KinematicSimulateResponse( motionDataResult.ErrorCode, null, null, null );
     }
 
     var response = new KinematicSimulateResponse(
       motionDataResult.ErrorCode,
       motionProfileResult.Data,
-      motionDataResult.Data
+      motionDataResult.Data,
+      destinationUnit
     );
 
     return response;

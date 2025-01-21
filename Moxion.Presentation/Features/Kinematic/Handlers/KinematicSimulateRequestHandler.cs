@@ -60,26 +60,26 @@ internal class KinematicSimulateRequestHandler
 
     if (validationResult.HasError)
     {
-      return new KinematicSimulateResponse( validationResult.ErrorCode, null, null );
+      return new KinematicSimulateResponse( validationResult.ErrorCode, null, null, null );
     }
 
     var queryResult = await _kinematicQueryFactory.Create( request, cancellationToken );
 
     if (queryResult.HasError)
     {
-      return new KinematicSimulateResponse( queryResult.ErrorCode, null, null );
+      return new KinematicSimulateResponse( queryResult.ErrorCode, null, null, null );
     }
 
     if (queryResult.Data is null)
     {
-      return new KinematicSimulateResponse( ErrorCode.UnexpectedNullData, null, null );
+      return new KinematicSimulateResponse( ErrorCode.UnexpectedNullData, null, null, null );
     }
 
     var result = await _sender.Send( queryResult.Data.Query, cancellationToken );
 
     if (result.ErrorCode != ErrorCode.NoError)
     {
-      return new KinematicSimulateResponse( result.ErrorCode, null, null );
+      return new KinematicSimulateResponse( result.ErrorCode, null, null, null );
     }
 
     var unitResult = await _kinematicUnitExtractor.Extract( request, CancellationToken.None );

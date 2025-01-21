@@ -26,6 +26,7 @@ public class KinematicController : ControllerBase
   }
 
   [HttpPost]
+  [Route("simulate")]
   public async Task<ActionResult<KinematicSimulateResponse>> Simulate( [FromBody] KinematicSimulateRequest request )
   {
     _logger.LogStart( nameof(KinematicSimulateRequest), request );

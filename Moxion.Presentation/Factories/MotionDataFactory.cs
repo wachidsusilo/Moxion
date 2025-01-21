@@ -7,7 +7,6 @@ using Moxion.Domain.Units;
 using Moxion.Presentation.Abstractions.Converters;
 using Moxion.Presentation.Abstractions.Factories;
 using Moxion.Presentation.Dto.Kinematic;
-using Moxion.Presentation.Dto.Values;
 
 namespace Moxion.Presentation.Factories;
 
@@ -185,33 +184,12 @@ internal class MotionDataFactory : IMotionDataFactory
       return Result.Error<MotionDataDto>( ErrorCode.OperationCancelled, default );
     }
 
-    var timeDto = new TimeDto( timeResult.Data.ToDouble(), destinationUnit.Duration.Unit );
-    var positionDto = new PositionDto( positionResult.Data.ToDouble(), destinationUnit.Displacement.Unit );
-
-    var velocityDto = new VelocityDto(
-      velocityResult.Data.ToDouble(),
-      destinationUnit.Velocity.PositionUnit,
-      destinationUnit.Velocity.TimeUnit
-    );
-
-    var accelerationDto = new AccelerationDto(
-      accelerationResult.Data.ToDouble(),
-      destinationUnit.Acceleration.PositionUnit,
-      destinationUnit.Acceleration.TimeUnit
-    );
-
-    var jerkDto = new JerkDto(
-      jerkResult.Data.ToDouble(),
-      destinationUnit.Jerk.PositionUnit,
-      destinationUnit.Jerk.TimeUnit
-    );
-
     var result = new MotionDataDto(
-      timeDto,
-      positionDto,
-      velocityDto,
-      accelerationDto,
-      jerkDto,
+      timeResult.Data.ToDouble(),
+      positionResult.Data.ToDouble(),
+      velocityResult.Data.ToDouble(),
+      accelerationResult.Data.ToDouble(),
+      jerkResult.Data.ToDouble(),
       motionData.Phase
     );
 

@@ -6,10 +6,10 @@ using Moxion.Presentation.Dto.Values;
 namespace Moxion.Presentation.Dto.Kinematic;
 
 public readonly record struct MotionDataDto(
-  TimeDto Time,
-  PositionDto Position,
-  VelocityDto Velocity,
-  AccelerationDto Acceleration,
-  JerkDto Jerk,
+  double Time,
+  double Position,
+  double Velocity,
+  double Acceleration,
+  double Jerk,
   MotionPhase Phase
 ) : IValueObjectDto<MotionDataDto>;
