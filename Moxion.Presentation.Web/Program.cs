@@ -31,9 +31,10 @@ builder.Services.AddApiVersioning( options =>
 builder.Services.AddCors( options =>
   options.AddDefaultPolicy( policyBuilder =>
     policyBuilder
-      .AllowAnyOrigin()
+      .SetIsOriginAllowed( _ => true )
       .AllowAnyMethod()
-      .AllowAnyOrigin()
+      .AllowAnyHeader()
+      .AllowCredentials()
   )
 );
 
