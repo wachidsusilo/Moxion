@@ -9,6 +9,8 @@ using Moxion.Application.Shared.Simulators.Params;
 using Moxion.Application.Shared.Simulators.Results;
 using Moxion.Common;
 using Moxion.Common.Enumerations;
+using Moxion.Common.Values;
+using Moxion.Common.Values.Derived;
 using Moxion.Domain.Kinematic;
 using Moxion.Extensions;
 using Moxion.Infrastructure.Kinematic.Extensions;
@@ -101,8 +103,8 @@ internal class MotionSimulator : IMotionSimulator
 
         var time = totalDuration * i / ( param.DataCount - 1.0 );
 
-        var phaseParam = new MotionPhaseCalculationParam( profile, time );
-        var phaseResult = await _phaseCalculator.Execute( phaseParam, cancelToken );
+        var motionParam = new MotionCalculationParam( time, profile );
+        var phaseResult = await _phaseCalculator.Execute( motionParam, cancelToken );
 
         if (phaseResult.HasError)
         {
@@ -110,12 +112,7 @@ internal class MotionSimulator : IMotionSimulator
           return;
         }
 
-        var phase = phaseResult.Data.MotionPhase;
-
-        var displacementParam =
-          new MotionDisplacementCalculationParam( profile, phase, profile.CalculateDuration( time, phase ) );
-
-        var positionResult = await _displacementCalculator.Execute( displacementParam, cancelToken );
+        var positionResult = await _displacementCalculator.Execute( motionParam, cancelToken );
 
         if (positionResult.HasError)
         {
@@ -123,12 +120,7 @@ internal class MotionSimulator : IMotionSimulator
           return;
         }
 
-        var position = positionResult.Data.Displacement;
-
-        var velocityParam =
-          new MotionVelocityCalculationParam( profile, phase, profile.CalculateDuration( time, phase ) );
-
-        var velocityResult = await _velocityCalculator.Execute( velocityParam, cancelToken );
+        var velocityResult = await _velocityCalculator.Execute( motionParam, cancelToken );
 
         if (velocityResult.HasError)
         {
@@ -136,12 +128,7 @@ internal class MotionSimulator : IMotionSimulator
           return;
         }
 
-        var velocity = velocityResult.Data.Velocity;
-
-        var accelerationParam =
-          new MotionAccelerationCalculationParam( profile, phase, profile.CalculateDuration( time, phase ) );
-
-        var accelerationResult = await _accelerationCalculator.Execute( accelerationParam, cancelToken );
+        var accelerationResult = await _accelerationCalculator.Execute( motionParam, cancelToken );
 
         if (accelerationResult.HasError)
         {
@@ -149,10 +136,7 @@ internal class MotionSimulator : IMotionSimulator
           return;
         }
 
-        var acceleration = accelerationResult.Data.Acceleration;
-
-        var jerkParam = new MotionJerkCalculationParam( profile, phase );
-        var jerkResult = await _jerkCalculator.Execute( jerkParam, cancelToken );
+        var jerkResult = await _jerkCalculator.Execute( motionParam, cancelToken );
 
         if (jerkResult.HasError)
         {
@@ -160,9 +144,14 @@ internal class MotionSimulator : IMotionSimulator
           return;
         }
 
+        var phase = phaseResult.Data.MotionPhase;
+        var position = positionResult.Data.Displacement;
+        var velocity = velocityResult.Data.Velocity;
+        var acceleration = accelerationResult.Data.Acceleration;
         var jerk = jerkResult.Data.Jerk;
 
         motionData[i] = new MotionData( time, position, velocity, acceleration, jerk, phase );
+        // motionData[i] = new MotionData( time, Position.Zero, velocity, Acceleration.Zero, Jerk.Zero, phase );
       }
     );
 

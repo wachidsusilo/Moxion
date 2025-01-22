@@ -11,7 +11,7 @@ namespace Moxion.Infrastructure.Kinematic.Calculators;
 internal class MotionPhaseCalculator : IMotionPhaseCalculator
 {
   public Task<Result<MotionPhaseCalculationResult>> Execute(
-    MotionPhaseCalculationParam param,
+    MotionCalculationParam param,
     CancellationToken cancellationToken
   )
   {

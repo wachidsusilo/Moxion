@@ -1,12 +1,10 @@
 ﻿using Moxion.Application.Abstractions.Calculators;
-using Moxion.Common.Enumerations;
 using Moxion.Common.Values;
 using Moxion.Domain.Kinematic;
 
 namespace Moxion.Application.Shared.Calculators.Params;
 
-internal readonly record struct MotionVelocityCalculationParam(
-  MotionProfile Profile,
-  MotionPhase Phase,
-  Time PhaseDuration
+public readonly record struct MotionCalculationParam(
+  Time Time,
+  MotionProfile Profile
 ) : ICalculationParam;

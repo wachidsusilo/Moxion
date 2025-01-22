@@ -13,7 +13,7 @@ public readonly record struct TimeCubed( Number Value ) : IValue<TimeCubed>
 
   public Time CubeRoot()
   {
-    throw new NotImplementedException();
+    return new Time( Value.Pow( 1m / 3m ) );
   }
 
   #region Operators

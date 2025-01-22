@@ -67,6 +67,18 @@ public readonly record struct Number( decimal Value ) : INumber<Number>
     return Value;
   }
 
+  public Number Sqrt()
+  {
+    // TODO: _ws Find better implementation
+    return Math.Sqrt( ToDouble() );
+  }
+
+  public Number Pow( Number exponent )
+  {
+    // TODO: _ws Find better implementation
+    return Math.Pow( ToDouble(), exponent.ToDouble() );
+  }
+
   public override int GetHashCode()
   {
     return Value.GetHashCode();

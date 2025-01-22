@@ -4,4 +4,4 @@ using Moxion.Application.Shared.Calculators.Results;
 namespace Moxion.Application.Abstractions.Calculators.Kinematic;
 
 internal interface IMotionAccelerationCalculator
-  : ICalculator<MotionAccelerationCalculationParam, MotionAccelerationCalculationResult>;
+  : ICalculator<MotionCalculationParam, MotionAccelerationCalculationResult>;

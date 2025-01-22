@@ -103,7 +103,7 @@ internal class KinematicQueryFactory : IKinematicQueryFactory
     }
 
     var jerkResult = await _unitConverter.Convert(
-      new Jerk( request.Acceleration.Value ),
+      new Jerk( request.Jerk.Value ),
       request.Jerk.PositionUnit,
       request.Jerk.TimeUnit,
       targetPositionUnit,

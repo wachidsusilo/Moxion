@@ -13,20 +13,23 @@ internal class MotionDisplacementCalculator : IMotionDisplacementCalculator
   private readonly IKinematics _kinematics;
   private readonly IMotionVelocityCalculator _velocityCalculator;
   private readonly IMotionAccelerationCalculator _accelerationCalculator;
+  private readonly IMotionPhaseCalculator _motionPhaseCalculator;
 
   public MotionDisplacementCalculator(
     IKinematics kinematics,
     IMotionVelocityCalculator velocityCalculator,
-    IMotionAccelerationCalculator accelerationCalculator
+    IMotionAccelerationCalculator accelerationCalculator,
+    IMotionPhaseCalculator motionPhaseCalculator
   )
   {
     _kinematics = kinematics;
     _velocityCalculator = velocityCalculator;
     _accelerationCalculator = accelerationCalculator;
+    _motionPhaseCalculator = motionPhaseCalculator;
   }
 
   public async Task<Result<MotionDisplacementCalculationResult>> Execute(
-    MotionDisplacementCalculationParam param,
+    MotionCalculationParam param,
     CancellationToken cancellationToken
   )
   {
@@ -35,10 +38,20 @@ internal class MotionDisplacementCalculator : IMotionDisplacementCalculator
       return Result.Error<MotionDisplacementCalculationResult>( ErrorCode.OperationCancelled );
     }
 
-    if (param.Phase == MotionPhase.AccelerationWithPositiveJerk)
+    var phaseResult = await _motionPhaseCalculator.Execute( param, cancellationToken );
+
+    if (phaseResult.HasError)
+    {
+      return Result.Error<MotionDisplacementCalculationResult>( phaseResult.ErrorCode );
+    }
+
+    var phase = phaseResult.Data.MotionPhase;
+    var phaseDuration = param.Profile.CalculateDuration( param.Time, phase );
+
+    if (phase == MotionPhase.AccelerationWithPositiveJerk)
     {
       return new MotionDisplacementCalculationResult(
-        _kinematics.CalculatePosition( param.PhaseDuration, param.Profile.Jerk )
+        _kinematics.CalculatePosition( phaseDuration, param.Profile.Jerk )
       );
     }
 
@@ -50,10 +63,10 @@ internal class MotionDisplacementCalculator : IMotionDisplacementCalculator
       return Result.Error<MotionDisplacementCalculationResult>( ErrorCode.OperationCancelled );
     }
 
-    if (param.Phase == MotionPhase.ConstantAcceleration)
+    if (phase == MotionPhase.ConstantAcceleration)
     {
       return new MotionDisplacementCalculationResult(
-        totalDisplacement + _kinematics.CalculatePosition( param.PhaseDuration, param.Profile.Acceleration )
+        totalDisplacement + _kinematics.CalculatePosition( phaseDuration, param.Profile.Acceleration )
       );
     }
 
@@ -67,19 +80,18 @@ internal class MotionDisplacementCalculator : IMotionDisplacementCalculator
       return Result.Error<MotionDisplacementCalculationResult>( ErrorCode.OperationCancelled );
     }
 
-    if (param.Phase == MotionPhase.AccelerationWithNegativeJerk)
+    if (phase == MotionPhase.AccelerationWithNegativeJerk)
     {
       var duration = param.Profile.CalculateTotalDuration( MotionPhase.ConstantAcceleration );
-      var velocityParam = new MotionVelocityCalculationParam( param.Profile, param.Phase, duration );
-      var velocityResult = await _velocityCalculator.Execute( velocityParam, cancellationToken );
+      var motionParam = param with { Time = duration };
+      var velocityResult = await _velocityCalculator.Execute( motionParam, cancellationToken );
 
       if (velocityResult.HasError)
       {
         return Result.Error<MotionDisplacementCalculationResult>( velocityResult.ErrorCode );
       }
 
-      var accelerationParam = new MotionAccelerationCalculationParam( param.Profile, param.Phase, duration );
-      var accelerationResult = await _accelerationCalculator.Execute( accelerationParam, cancellationToken );
+      var accelerationResult = await _accelerationCalculator.Execute( motionParam, cancellationToken );
 
       if (accelerationResult.HasError)
       {
@@ -91,7 +103,7 @@ internal class MotionDisplacementCalculator : IMotionDisplacementCalculator
 
       return new MotionDisplacementCalculationResult(
         totalDisplacement +
-        _kinematics.CalculatePosition( param.PhaseDuration, velocity, acceleration, -param.Profile.Jerk )
+        _kinematics.CalculatePosition( phaseDuration, velocity, acceleration, -param.Profile.Jerk )
       );
     }
 
@@ -102,10 +114,10 @@ internal class MotionDisplacementCalculator : IMotionDisplacementCalculator
       return Result.Error<MotionDisplacementCalculationResult>( ErrorCode.OperationCancelled );
     }
 
-    if (param.Phase == MotionPhase.ConstantVelocity)
+    if (phase == MotionPhase.ConstantVelocity)
     {
       return new MotionDisplacementCalculationResult(
-        totalDisplacement + _kinematics.CalculatePosition( param.PhaseDuration, param.Profile.Velocity )
+        totalDisplacement + _kinematics.CalculatePosition( phaseDuration, param.Profile.Velocity )
       );
     }
 
@@ -116,11 +128,11 @@ internal class MotionDisplacementCalculator : IMotionDisplacementCalculator
       return Result.Error<MotionDisplacementCalculationResult>( ErrorCode.OperationCancelled );
     }
 
-    if (param.Phase == MotionPhase.DecelerationWithNegativeJerk)
+    if (phase == MotionPhase.DecelerationWithNegativeJerk)
     {
       var duration = param.Profile.CalculateTotalDuration( MotionPhase.ConstantVelocity );
-      var velocityParam = new MotionVelocityCalculationParam( param.Profile, param.Phase, duration );
-      var velocityResult = await _velocityCalculator.Execute( velocityParam, cancellationToken );
+      var motionParam = param with { Time = duration };
+      var velocityResult = await _velocityCalculator.Execute( motionParam, cancellationToken );
 
       if (velocityResult.HasError)
       {
@@ -130,7 +142,7 @@ internal class MotionDisplacementCalculator : IMotionDisplacementCalculator
       var velocity = velocityResult.Data.Velocity;
 
       return new MotionDisplacementCalculationResult(
-        totalDisplacement + _kinematics.CalculatePosition( param.PhaseDuration, velocity, -param.Profile.Jerk )
+        totalDisplacement + _kinematics.CalculatePosition( phaseDuration, velocity, -param.Profile.Jerk )
       );
     }
 
@@ -141,10 +153,10 @@ internal class MotionDisplacementCalculator : IMotionDisplacementCalculator
       return Result.Error<MotionDisplacementCalculationResult>( ErrorCode.OperationCancelled );
     }
 
-    if (param.Phase == MotionPhase.ConstantDeceleration)
+    if (phase == MotionPhase.ConstantDeceleration)
     {
       var duration = param.Profile.CalculateTotalDuration( MotionPhase.DecelerationWithNegativeJerk );
-      var velocityParam = new MotionVelocityCalculationParam( param.Profile, param.Phase, duration );
+      var velocityParam = param with { Time = duration };
       var velocityResult = await _velocityCalculator.Execute( velocityParam, cancellationToken );
 
       if (velocityResult.HasError)
@@ -155,7 +167,7 @@ internal class MotionDisplacementCalculator : IMotionDisplacementCalculator
       var velocity = velocityResult.Data.Velocity;
 
       return new MotionDisplacementCalculationResult(
-        totalDisplacement + _kinematics.CalculatePosition( param.PhaseDuration, velocity, -param.Profile.Acceleration )
+        totalDisplacement + _kinematics.CalculatePosition( phaseDuration, velocity, -param.Profile.Acceleration )
       );
     }
 
@@ -167,17 +179,15 @@ internal class MotionDisplacementCalculator : IMotionDisplacementCalculator
     }
 
     var totalDuration = param.Profile.CalculateTotalDuration( MotionPhase.ConstantDeceleration );
-    var initialVelocityParam = new MotionVelocityCalculationParam( param.Profile, param.Phase, totalDuration );
-    var initialVelocityResult = await _velocityCalculator.Execute( initialVelocityParam, cancellationToken );
+    var motionCalculationParam = param with { Time = totalDuration };
+    var initialVelocityResult = await _velocityCalculator.Execute( motionCalculationParam, cancellationToken );
 
     if (initialVelocityResult.HasError)
     {
       return Result.Error<MotionDisplacementCalculationResult>( initialVelocityResult.ErrorCode );
     }
 
-    var initialAccelerationParam = new MotionAccelerationCalculationParam( param.Profile, param.Phase, totalDuration );
-    var initialAccelerationResult =
-      await _accelerationCalculator.Execute( initialAccelerationParam, cancellationToken );
+    var initialAccelerationResult = await _accelerationCalculator.Execute( motionCalculationParam, cancellationToken );
 
     if (initialAccelerationResult.HasError)
     {
@@ -189,7 +199,7 @@ internal class MotionDisplacementCalculator : IMotionDisplacementCalculator
 
     return new MotionDisplacementCalculationResult(
       totalDisplacement +
-      _kinematics.CalculatePosition( param.PhaseDuration, initialVelocity, initialAcceleration, param.Profile.Jerk )
+      _kinematics.CalculatePosition( phaseDuration, initialVelocity, initialAcceleration, param.Profile.Jerk )
     );
   }
 }

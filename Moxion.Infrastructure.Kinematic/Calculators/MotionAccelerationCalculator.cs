@@ -5,35 +5,46 @@ using Moxion.Application.Shared.Calculators.Results;
 using Moxion.Common;
 using Moxion.Common.Enumerations;
 using Moxion.Common.Values.Derived;
+using Moxion.Infrastructure.Kinematic.Extensions;
 
 namespace Moxion.Infrastructure.Kinematic.Calculators;
 
 internal class MotionAccelerationCalculator : IMotionAccelerationCalculator
 {
   private readonly IKinematics _kinematics;
+  private readonly IMotionPhaseCalculator _motionPhaseCalculator;
 
-  public MotionAccelerationCalculator( IKinematics kinematics )
+  public MotionAccelerationCalculator( IKinematics kinematics, IMotionPhaseCalculator motionPhaseCalculator )
   {
     _kinematics = kinematics;
+    _motionPhaseCalculator = motionPhaseCalculator;
   }
 
-  public Task<Result<MotionAccelerationCalculationResult>> Execute(
-    MotionAccelerationCalculationParam param,
+  public async Task<Result<MotionAccelerationCalculationResult>> Execute(
+    MotionCalculationParam param,
     CancellationToken cancellationToken
   )
   {
     if (cancellationToken.IsCancellationRequested)
     {
-      return Task.FromResult( Result.Error<MotionAccelerationCalculationResult>( ErrorCode.OperationCancelled ) );
+      return Result.Error<MotionAccelerationCalculationResult>( ErrorCode.OperationCancelled );
     }
 
-    if (param.Phase == MotionPhase.AccelerationWithPositiveJerk)
+    var phaseResult = await _motionPhaseCalculator.Execute( param, cancellationToken );
+
+    if (phaseResult.HasError)
     {
-      return Task.FromResult(
-        Result.Success(
-          new MotionAccelerationCalculationResult(
-            _kinematics.CalculateAcceleration( param.PhaseDuration, param.Profile.Jerk )
-          )
+      return Result.Error<MotionAccelerationCalculationResult>( phaseResult.ErrorCode );
+    }
+
+    var phase = phaseResult.Data.MotionPhase;
+    var phaseDuration = param.Profile.CalculateDuration( param.Time, phase );
+
+    if (phase == MotionPhase.AccelerationWithPositiveJerk)
+    {
+      return Result.Success(
+        new MotionAccelerationCalculationResult(
+          _kinematics.CalculateAcceleration( phaseDuration, param.Profile.Jerk )
         )
       );
     }
@@ -42,34 +53,30 @@ internal class MotionAccelerationCalculator : IMotionAccelerationCalculator
 
     if (cancellationToken.IsCancellationRequested)
     {
-      return Task.FromResult( Result.Error<MotionAccelerationCalculationResult>( ErrorCode.OperationCancelled ) );
+      return Result.Error<MotionAccelerationCalculationResult>( ErrorCode.OperationCancelled );
     }
 
-    if (param.Phase == MotionPhase.ConstantAcceleration)
+    if (phase == MotionPhase.ConstantAcceleration)
     {
-      return Task.FromResult(
-        Result.Success(
-          new MotionAccelerationCalculationResult( param.Profile.Acceleration )
-        )
+      return Result.Success(
+        new MotionAccelerationCalculationResult( param.Profile.Acceleration )
       );
     }
 
-    lastPhaseAcceleration = param.Profile.AccelerationDuration.IsPositive
+    lastPhaseAcceleration = !param.Profile.AccelerationDuration.IsZero
       ? param.Profile.Acceleration
       : lastPhaseAcceleration;
 
     if (cancellationToken.IsCancellationRequested)
     {
-      return Task.FromResult( Result.Error<MotionAccelerationCalculationResult>( ErrorCode.OperationCancelled ) );
+      return Result.Error<MotionAccelerationCalculationResult>( ErrorCode.OperationCancelled );
     }
 
-    if (param.Phase == MotionPhase.AccelerationWithNegativeJerk)
+    if (phase == MotionPhase.AccelerationWithNegativeJerk)
     {
-      return Task.FromResult(
-        Result.Success(
-          new MotionAccelerationCalculationResult(
-            lastPhaseAcceleration + _kinematics.CalculateAcceleration( param.PhaseDuration, -param.Profile.Jerk )
-          )
+      return Result.Success(
+        new MotionAccelerationCalculationResult(
+          lastPhaseAcceleration + _kinematics.CalculateAcceleration( phaseDuration, -param.Profile.Jerk )
         )
       );
     }
@@ -78,34 +85,30 @@ internal class MotionAccelerationCalculator : IMotionAccelerationCalculator
 
     if (cancellationToken.IsCancellationRequested)
     {
-      return Task.FromResult( Result.Error<MotionAccelerationCalculationResult>( ErrorCode.OperationCancelled ) );
+      return Result.Error<MotionAccelerationCalculationResult>( ErrorCode.OperationCancelled );
     }
 
-    if (param.Phase == MotionPhase.ConstantVelocity)
+    if (phase == MotionPhase.ConstantVelocity)
     {
-      return Task.FromResult(
-        Result.Success(
-          new MotionAccelerationCalculationResult( Acceleration.Zero )
-        )
+      return Result.Success(
+        new MotionAccelerationCalculationResult( Acceleration.Zero )
       );
     }
 
-    lastPhaseAcceleration = param.Profile.SteadyMotionDuration.IsPositive
+    lastPhaseAcceleration = !param.Profile.SteadyMotionDuration.IsZero
       ? Acceleration.Zero
       : lastPhaseAcceleration;
 
     if (cancellationToken.IsCancellationRequested)
     {
-      return Task.FromResult( Result.Error<MotionAccelerationCalculationResult>( ErrorCode.OperationCancelled ) );
+      return Result.Error<MotionAccelerationCalculationResult>( ErrorCode.OperationCancelled );
     }
 
-    if (param.Phase == MotionPhase.DecelerationWithNegativeJerk)
+    if (phase == MotionPhase.DecelerationWithNegativeJerk)
     {
-      return Task.FromResult(
-        Result.Success(
-          new MotionAccelerationCalculationResult(
-            lastPhaseAcceleration + _kinematics.CalculateAcceleration( param.PhaseDuration, -param.Profile.Jerk )
-          )
+      return Result.Success(
+        new MotionAccelerationCalculationResult(
+          lastPhaseAcceleration + _kinematics.CalculateAcceleration( phaseDuration, -param.Profile.Jerk )
         )
       );
     }
@@ -114,27 +117,23 @@ internal class MotionAccelerationCalculator : IMotionAccelerationCalculator
 
     if (cancellationToken.IsCancellationRequested)
     {
-      return Task.FromResult( Result.Error<MotionAccelerationCalculationResult>( ErrorCode.OperationCancelled ) );
+      return Result.Error<MotionAccelerationCalculationResult>( ErrorCode.OperationCancelled );
     }
 
-    if (param.Phase == MotionPhase.ConstantDeceleration)
+    if (phase == MotionPhase.ConstantDeceleration)
     {
-      return Task.FromResult(
-        Result.Success(
-          new MotionAccelerationCalculationResult( -param.Profile.Acceleration )
-        )
+      return Result.Success(
+        new MotionAccelerationCalculationResult( -param.Profile.Acceleration )
       );
     }
 
-    lastPhaseAcceleration = param.Profile.AccelerationDuration.IsPositive
+    lastPhaseAcceleration = !param.Profile.AccelerationDuration.IsZero
       ? -param.Profile.Acceleration
       : lastPhaseAcceleration;
 
-    return Task.FromResult(
-      Result.Success(
-        new MotionAccelerationCalculationResult(
-          lastPhaseAcceleration + _kinematics.CalculateAcceleration( param.PhaseDuration, param.Profile.Jerk )
-        )
+    return Result.Success(
+      new MotionAccelerationCalculationResult(
+        lastPhaseAcceleration + _kinematics.CalculateAcceleration( phaseDuration, param.Profile.Jerk )
       )
     );
   }
