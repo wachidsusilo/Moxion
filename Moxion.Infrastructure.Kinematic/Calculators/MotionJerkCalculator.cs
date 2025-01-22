@@ -9,18 +9,18 @@ namespace Moxion.Infrastructure.Kinematic.Calculators;
 
 internal class MotionJerkCalculator : IMotionJerkCalculator
 {
-  public Task<Result<MotionJerkCalculationResult?>> Execute(
+  public Task<Result<MotionJerkCalculationResult>> Execute(
     MotionJerkCalculationParam param,
     CancellationToken cancellationToken
   )
   {
     if (cancellationToken.IsCancellationRequested)
     {
-      return Task.FromResult( Result.Error<MotionJerkCalculationResult?>( ErrorCode.OperationCancelled ) );
+      return Task.FromResult( Result.Error<MotionJerkCalculationResult>( ErrorCode.OperationCancelled ) );
     }
 
     return Task.FromResult(
-      Result.Success<MotionJerkCalculationResult?>(
+      Result.Success(
         new MotionJerkCalculationResult(
           param.Phase switch
           {

@@ -10,14 +10,14 @@ namespace Moxion.Infrastructure.Kinematic.Calculators;
 
 internal class MotionPhaseCalculator : IMotionPhaseCalculator
 {
-  public Task<Result<MotionPhaseCalculationResult?>> Execute(
+  public Task<Result<MotionPhaseCalculationResult>> Execute(
     MotionPhaseCalculationParam param,
     CancellationToken cancellationToken
   )
   {
     if (cancellationToken.IsCancellationRequested)
     {
-      return Task.FromResult( Result.Error<MotionPhaseCalculationResult?>( ErrorCode.OperationCancelled ) );
+      return Task.FromResult( Result.Error<MotionPhaseCalculationResult>( ErrorCode.OperationCancelled ) );
     }
 
     var profileType = param.Profile.GetProfileType();
@@ -30,7 +30,7 @@ internal class MotionPhaseCalculator : IMotionPhaseCalculator
     if (profileType is MotionProfileType.Linear)
     {
       return Task.FromResult(
-        Result.Success<MotionPhaseCalculationResult?>(
+        Result.Success(
           new MotionPhaseCalculationResult( MotionPhase.ConstantVelocity )
         )
       );
@@ -38,13 +38,13 @@ internal class MotionPhaseCalculator : IMotionPhaseCalculator
 
     if (cancellationToken.IsCancellationRequested)
     {
-      return Task.FromResult( Result.Error<MotionPhaseCalculationResult?>( ErrorCode.OperationCancelled ) );
+      return Task.FromResult( Result.Error<MotionPhaseCalculationResult>( ErrorCode.OperationCancelled ) );
     }
 
     if (profileType is MotionProfileType.Triangular)
     {
       return Task.FromResult(
-        Result.Success<MotionPhaseCalculationResult?>(
+        Result.Success(
           new MotionPhaseCalculationResult(
             param.Time <= param.Profile.CalculateTotalDuration( MotionPhase.ConstantAcceleration )
               ? MotionPhase.ConstantAcceleration
@@ -56,13 +56,13 @@ internal class MotionPhaseCalculator : IMotionPhaseCalculator
 
     if (cancellationToken.IsCancellationRequested)
     {
-      return Task.FromResult( Result.Error<MotionPhaseCalculationResult?>( ErrorCode.OperationCancelled ) );
+      return Task.FromResult( Result.Error<MotionPhaseCalculationResult>( ErrorCode.OperationCancelled ) );
     }
 
     if (profileType is MotionProfileType.Trapezoid)
     {
       return Task.FromResult(
-        Result.Success<MotionPhaseCalculationResult?>(
+        Result.Success(
           new MotionPhaseCalculationResult(
             param.Time <= param.Profile.CalculateTotalDuration( MotionPhase.ConstantAcceleration )
               ? MotionPhase.ConstantAcceleration
@@ -76,13 +76,13 @@ internal class MotionPhaseCalculator : IMotionPhaseCalculator
 
     if (cancellationToken.IsCancellationRequested)
     {
-      return Task.FromResult( Result.Error<MotionPhaseCalculationResult?>( ErrorCode.OperationCancelled ) );
+      return Task.FromResult( Result.Error<MotionPhaseCalculationResult>( ErrorCode.OperationCancelled ) );
     }
 
     if (param.Time <= param.Profile.CalculateTotalDuration( MotionPhase.AccelerationWithPositiveJerk ))
     {
       return Task.FromResult(
-        Result.Success<MotionPhaseCalculationResult?>(
+        Result.Success(
           new MotionPhaseCalculationResult( MotionPhase.AccelerationWithPositiveJerk )
         )
       );
@@ -90,13 +90,13 @@ internal class MotionPhaseCalculator : IMotionPhaseCalculator
 
     if (cancellationToken.IsCancellationRequested)
     {
-      return Task.FromResult( Result.Error<MotionPhaseCalculationResult?>( ErrorCode.OperationCancelled ) );
+      return Task.FromResult( Result.Error<MotionPhaseCalculationResult>( ErrorCode.OperationCancelled ) );
     }
 
     if (param.Time <= param.Profile.CalculateTotalDuration( MotionPhase.ConstantAcceleration ))
     {
       return Task.FromResult(
-        Result.Success<MotionPhaseCalculationResult?>(
+        Result.Success(
           new MotionPhaseCalculationResult( MotionPhase.ConstantAcceleration )
         )
       );
@@ -104,13 +104,13 @@ internal class MotionPhaseCalculator : IMotionPhaseCalculator
 
     if (cancellationToken.IsCancellationRequested)
     {
-      return Task.FromResult( Result.Error<MotionPhaseCalculationResult?>( ErrorCode.OperationCancelled ) );
+      return Task.FromResult( Result.Error<MotionPhaseCalculationResult>( ErrorCode.OperationCancelled ) );
     }
 
     if (param.Time <= param.Profile.CalculateTotalDuration( MotionPhase.AccelerationWithNegativeJerk ))
     {
       return Task.FromResult(
-        Result.Success<MotionPhaseCalculationResult?>(
+        Result.Success(
           new MotionPhaseCalculationResult( MotionPhase.AccelerationWithNegativeJerk )
         )
       );
@@ -118,13 +118,13 @@ internal class MotionPhaseCalculator : IMotionPhaseCalculator
 
     if (cancellationToken.IsCancellationRequested)
     {
-      return Task.FromResult( Result.Error<MotionPhaseCalculationResult?>( ErrorCode.OperationCancelled ) );
+      return Task.FromResult( Result.Error<MotionPhaseCalculationResult>( ErrorCode.OperationCancelled ) );
     }
 
     if (param.Time <= param.Profile.CalculateTotalDuration( MotionPhase.ConstantVelocity ))
     {
       return Task.FromResult(
-        Result.Success<MotionPhaseCalculationResult?>(
+        Result.Success(
           new MotionPhaseCalculationResult( MotionPhase.ConstantVelocity )
         )
       );
@@ -132,20 +132,20 @@ internal class MotionPhaseCalculator : IMotionPhaseCalculator
 
     if (cancellationToken.IsCancellationRequested)
     {
-      return Task.FromResult( Result.Error<MotionPhaseCalculationResult?>( ErrorCode.OperationCancelled ) );
+      return Task.FromResult( Result.Error<MotionPhaseCalculationResult>( ErrorCode.OperationCancelled ) );
     }
 
     if (param.Time <= param.Profile.CalculateTotalDuration( MotionPhase.DecelerationWithNegativeJerk ))
     {
       return Task.FromResult(
-        Result.Success<MotionPhaseCalculationResult?>(
+        Result.Success(
           new MotionPhaseCalculationResult( MotionPhase.DecelerationWithNegativeJerk )
         )
       );
     }
 
     return Task.FromResult(
-      Result.Success<MotionPhaseCalculationResult?>(
+      Result.Success(
         new MotionPhaseCalculationResult(
           param.Time <= param.Profile.CalculateTotalDuration( MotionPhase.ConstantDeceleration )
             ? MotionPhase.ConstantDeceleration

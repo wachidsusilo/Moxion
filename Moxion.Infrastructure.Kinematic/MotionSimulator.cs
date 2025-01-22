@@ -44,7 +44,7 @@ internal class MotionSimulator : IMotionSimulator
     _logger = logger;
   }
 
-  public async Task<Result<MotionSimulationResult?>> Execute(
+  public async Task<Result<MotionSimulationResult>> Execute(
     MotionSimulationParam param,
     CancellationToken cancellationToken
   )
@@ -53,19 +53,19 @@ internal class MotionSimulator : IMotionSimulator
 
     var result = await ExecuteInternal( param, cancellationToken );
 
-    _logger.LogEnd( result, result.Data?.MotionData.Length );
+    _logger.LogEnd( result, result.Data.MotionData.Length );
 
     return result;
   }
 
-  private async Task<Result<MotionSimulationResult?>> ExecuteInternal(
+  private async Task<Result<MotionSimulationResult>> ExecuteInternal(
     MotionSimulationParam param,
     CancellationToken cancellationToken
   )
   {
     if (cancellationToken.IsCancellationRequested)
     {
-      return Result.Error<MotionSimulationResult?>( ErrorCode.OperationCancelled );
+      return Result.Error<MotionSimulationResult>( ErrorCode.OperationCancelled );
     }
 
     var profileParam = new MotionProfileGenerationParam(
@@ -79,17 +79,12 @@ internal class MotionSimulator : IMotionSimulator
 
     if (profileResult.HasError)
     {
-      return Result.Error<MotionSimulationResult?>( profileResult.ErrorCode );
-    }
-
-    if (profileResult.Data is null)
-    {
-      return Result.Error<MotionSimulationResult?>( ErrorCode.UnexpectedNullData );
+      return Result.Error<MotionSimulationResult>( profileResult.ErrorCode );
     }
 
     if (cancellationToken.IsCancellationRequested)
     {
-      return Result.Error<MotionSimulationResult?>( ErrorCode.OperationCancelled );
+      return Result.Error<MotionSimulationResult>( ErrorCode.OperationCancelled );
     }
 
     var profile = profileResult.Data.MotionProfile;
@@ -115,12 +110,6 @@ internal class MotionSimulator : IMotionSimulator
           return;
         }
 
-        if (phaseResult.Data is null)
-        {
-          errorCode = ErrorCode.UnexpectedNullData;
-          return;
-        }
-
         var phase = phaseResult.Data.MotionPhase;
 
         var displacementParam =
@@ -131,12 +120,6 @@ internal class MotionSimulator : IMotionSimulator
         if (positionResult.HasError)
         {
           errorCode = positionResult.ErrorCode;
-          return;
-        }
-
-        if (positionResult.Data is null)
-        {
-          errorCode = ErrorCode.UnexpectedNullData;
           return;
         }
 
@@ -153,12 +136,6 @@ internal class MotionSimulator : IMotionSimulator
           return;
         }
 
-        if (velocityResult.Data is null)
-        {
-          errorCode = ErrorCode.UnexpectedNullData;
-          return;
-        }
-
         var velocity = velocityResult.Data.Velocity;
 
         var accelerationParam =
@@ -169,12 +146,6 @@ internal class MotionSimulator : IMotionSimulator
         if (accelerationResult.HasError)
         {
           errorCode = accelerationResult.ErrorCode;
-          return;
-        }
-
-        if (accelerationResult.Data is null)
-        {
-          errorCode = ErrorCode.UnexpectedNullData;
           return;
         }
 
@@ -189,12 +160,6 @@ internal class MotionSimulator : IMotionSimulator
           return;
         }
 
-        if (jerkResult.Data is null)
-        {
-          errorCode = ErrorCode.UnexpectedNullData;
-          return;
-        }
-
         var jerk = jerkResult.Data.Jerk;
 
         motionData[i] = new MotionData( time, position, velocity, acceleration, jerk, phase );
@@ -202,6 +167,6 @@ internal class MotionSimulator : IMotionSimulator
     );
 
     var result = new MotionSimulationResult( profile, motionData );
-    return Result.Create<MotionSimulationResult?>( errorCode, result );
+    return Result.Create( errorCode, result );
   }
 }

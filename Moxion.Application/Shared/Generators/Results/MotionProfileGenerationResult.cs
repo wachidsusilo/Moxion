@@ -3,4 +3,4 @@ using Moxion.Domain.Kinematic;
 
 namespace Moxion.Application.Shared.Generators.Results;
 
-internal record MotionProfileGenerationResult( MotionProfile MotionProfile ) : IGenerationResult;
+internal readonly record struct MotionProfileGenerationResult( MotionProfile MotionProfile ) : IGenerationResult;

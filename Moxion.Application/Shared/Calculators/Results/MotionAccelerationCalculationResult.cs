@@ -3,4 +3,4 @@ using Moxion.Common.Values.Derived;
 
 namespace Moxion.Application.Shared.Calculators.Results;
 
-internal record MotionAccelerationCalculationResult( Acceleration Acceleration ) : ICalculationResult;
+internal readonly record struct MotionAccelerationCalculationResult( Acceleration Acceleration ) : ICalculationResult;

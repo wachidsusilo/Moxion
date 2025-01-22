@@ -25,7 +25,7 @@ internal class MotionProfileGenerator : IMotionProfileGenerator
     _logger = logger;
   }
 
-  public Task<Result<MotionProfileGenerationResult?>> Execute(
+  public Task<Result<MotionProfileGenerationResult>> Execute(
     MotionProfileGenerationParam param,
     CancellationToken cancellationToken
   )
@@ -39,7 +39,7 @@ internal class MotionProfileGenerator : IMotionProfileGenerator
     return Task.FromResult( result );
   }
 
-  private Result<MotionProfileGenerationResult?> ExecuteInternal(
+  private Result<MotionProfileGenerationResult> ExecuteInternal(
     MotionProfileGenerationParam param,
     CancellationToken cancellationToken
   )
@@ -69,7 +69,7 @@ internal class MotionProfileGenerator : IMotionProfileGenerator
         steadyMotionDuration
       );
 
-      return Result.Success<MotionProfileGenerationResult?>( new MotionProfileGenerationResult( profile ) );
+      return Result.Success( new MotionProfileGenerationResult( profile ) );
     }
 
     if (cancellationToken.IsCancellationRequested)
@@ -103,7 +103,7 @@ internal class MotionProfileGenerator : IMotionProfileGenerator
           Time.Zero
         );
 
-        return Result.Success<MotionProfileGenerationResult?>( new MotionProfileGenerationResult( profile ) );
+        return Result.Success( new MotionProfileGenerationResult( profile ) );
       }
 
       // Trapezoid
@@ -125,7 +125,7 @@ internal class MotionProfileGenerator : IMotionProfileGenerator
         steadyMotionDuration
       );
 
-      return Result.Success<MotionProfileGenerationResult?>( new MotionProfileGenerationResult( motionProfile ) );
+      return Result.Success( new MotionProfileGenerationResult( motionProfile ) );
     }
 
     if (cancellationToken.IsCancellationRequested)
@@ -168,7 +168,7 @@ internal class MotionProfileGenerator : IMotionProfileGenerator
           Time.Zero
         );
 
-        return Result.Success<MotionProfileGenerationResult?>( new MotionProfileGenerationResult( profile ) );
+        return Result.Success( new MotionProfileGenerationResult( profile ) );
       }
 
       // Jerk with Steady State
@@ -198,7 +198,7 @@ internal class MotionProfileGenerator : IMotionProfileGenerator
         steadyMotionDuration
       );
 
-      return Result.Success<MotionProfileGenerationResult?>( new MotionProfileGenerationResult( motionProfile ) );
+      return Result.Success( new MotionProfileGenerationResult( motionProfile ) );
     }
 
     if (cancellationToken.IsCancellationRequested)
@@ -241,7 +241,7 @@ internal class MotionProfileGenerator : IMotionProfileGenerator
         steadyMotionDuration
       );
 
-      return Result.Success<MotionProfileGenerationResult?>( new MotionProfileGenerationResult( profile ) );
+      return Result.Success( new MotionProfileGenerationResult( profile ) );
     }
 
     if (cancellationToken.IsCancellationRequested)
@@ -282,6 +282,6 @@ internal class MotionProfileGenerator : IMotionProfileGenerator
       steadyPhaseDuration
     );
 
-    return Result.Success<MotionProfileGenerationResult?>( new MotionProfileGenerationResult( profileResult ) );
+    return Result.Success( new MotionProfileGenerationResult( profileResult ) );
   }
 }

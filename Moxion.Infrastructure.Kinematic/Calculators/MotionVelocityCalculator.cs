@@ -22,14 +22,14 @@ internal class MotionVelocityCalculator : IMotionVelocityCalculator
     _accelerationCalculator = accelerationCalculator;
   }
 
-  public async Task<Result<MotionVelocityCalculationResult?>> Execute(
+  public async Task<Result<MotionVelocityCalculationResult>> Execute(
     MotionVelocityCalculationParam param,
     CancellationToken cancellationToken
   )
   {
     if (cancellationToken.IsCancellationRequested)
     {
-      return Result.Error<MotionVelocityCalculationResult?>( ErrorCode.OperationCancelled );
+      return Result.Error<MotionVelocityCalculationResult>( ErrorCode.OperationCancelled );
     }
 
     if (param.Phase == MotionPhase.AccelerationWithPositiveJerk)
@@ -43,7 +43,7 @@ internal class MotionVelocityCalculator : IMotionVelocityCalculator
 
     if (cancellationToken.IsCancellationRequested)
     {
-      return Result.Error<MotionVelocityCalculationResult?>( ErrorCode.OperationCancelled );
+      return Result.Error<MotionVelocityCalculationResult>( ErrorCode.OperationCancelled );
     }
 
     if (param.Phase == MotionPhase.ConstantAcceleration)
@@ -53,11 +53,12 @@ internal class MotionVelocityCalculator : IMotionVelocityCalculator
       );
     }
 
-    lastPhaseVelocity += _kinematics.CalculateVelocity( param.Profile.AccelerationDuration, param.Profile.Acceleration );
+    lastPhaseVelocity +=
+      _kinematics.CalculateVelocity( param.Profile.AccelerationDuration, param.Profile.Acceleration );
 
     if (cancellationToken.IsCancellationRequested)
     {
-      return Result.Error<MotionVelocityCalculationResult?>( ErrorCode.OperationCancelled );
+      return Result.Error<MotionVelocityCalculationResult>( ErrorCode.OperationCancelled );
     }
 
     var accelerationParam = new MotionAccelerationCalculationParam(
@@ -70,19 +71,14 @@ internal class MotionVelocityCalculator : IMotionVelocityCalculator
 
     if (accelerationResult.HasError)
     {
-      return Result.Error<MotionVelocityCalculationResult?>( accelerationResult.ErrorCode );
-    }
-
-    if (accelerationResult.Data is null)
-    {
-      return Result.Error<MotionVelocityCalculationResult?>( ErrorCode.UnexpectedNullData );
+      return Result.Error<MotionVelocityCalculationResult>( accelerationResult.ErrorCode );
     }
 
     var acceleration = accelerationResult.Data.Acceleration;
 
     if (cancellationToken.IsCancellationRequested)
     {
-      return Result.Error<MotionVelocityCalculationResult?>( ErrorCode.OperationCancelled );
+      return Result.Error<MotionVelocityCalculationResult>( ErrorCode.OperationCancelled );
     }
 
     if (param.Phase == MotionPhase.AccelerationWithNegativeJerk)
@@ -105,7 +101,7 @@ internal class MotionVelocityCalculator : IMotionVelocityCalculator
 
     if (cancellationToken.IsCancellationRequested)
     {
-      return Result.Error<MotionVelocityCalculationResult?>( ErrorCode.OperationCancelled );
+      return Result.Error<MotionVelocityCalculationResult>( ErrorCode.OperationCancelled );
     }
 
     if (param.Phase == MotionPhase.DecelerationWithNegativeJerk)
@@ -119,7 +115,7 @@ internal class MotionVelocityCalculator : IMotionVelocityCalculator
 
     if (cancellationToken.IsCancellationRequested)
     {
-      return Result.Error<MotionVelocityCalculationResult?>( ErrorCode.OperationCancelled );
+      return Result.Error<MotionVelocityCalculationResult>( ErrorCode.OperationCancelled );
     }
 
     if (param.Phase == MotionPhase.ConstantDeceleration)
@@ -134,7 +130,7 @@ internal class MotionVelocityCalculator : IMotionVelocityCalculator
 
     if (cancellationToken.IsCancellationRequested)
     {
-      return Result.Error<MotionVelocityCalculationResult?>( ErrorCode.OperationCancelled );
+      return Result.Error<MotionVelocityCalculationResult>( ErrorCode.OperationCancelled );
     }
 
     var decelerationParam = new MotionAccelerationCalculationParam(
@@ -147,12 +143,7 @@ internal class MotionVelocityCalculator : IMotionVelocityCalculator
 
     if (decelerationResult.HasError)
     {
-      return Result.Error<MotionVelocityCalculationResult?>( decelerationResult.ErrorCode );
-    }
-
-    if (decelerationResult.Data is null)
-    {
-      return Result.Error<MotionVelocityCalculationResult?>( ErrorCode.UnexpectedNullData );
+      return Result.Error<MotionVelocityCalculationResult>( decelerationResult.ErrorCode );
     }
 
     var deceleration = decelerationResult.Data.Acceleration;

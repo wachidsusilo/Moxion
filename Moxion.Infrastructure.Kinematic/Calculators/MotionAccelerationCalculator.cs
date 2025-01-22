@@ -17,7 +17,7 @@ internal class MotionAccelerationCalculator : IMotionAccelerationCalculator
     _kinematics = kinematics;
   }
 
-  public Task<Result<MotionAccelerationCalculationResult?>> Execute(
+  public Task<Result<MotionAccelerationCalculationResult>> Execute(
     MotionAccelerationCalculationParam param,
     CancellationToken cancellationToken
   )
@@ -30,7 +30,7 @@ internal class MotionAccelerationCalculator : IMotionAccelerationCalculator
     if (param.Phase == MotionPhase.AccelerationWithPositiveJerk)
     {
       return Task.FromResult(
-        Result.Success<MotionAccelerationCalculationResult?>(
+        Result.Success(
           new MotionAccelerationCalculationResult(
             _kinematics.CalculateAcceleration( param.PhaseDuration, param.Profile.Jerk )
           )
@@ -48,7 +48,7 @@ internal class MotionAccelerationCalculator : IMotionAccelerationCalculator
     if (param.Phase == MotionPhase.ConstantAcceleration)
     {
       return Task.FromResult(
-        Result.Success<MotionAccelerationCalculationResult?>(
+        Result.Success(
           new MotionAccelerationCalculationResult( param.Profile.Acceleration )
         )
       );
@@ -66,7 +66,7 @@ internal class MotionAccelerationCalculator : IMotionAccelerationCalculator
     if (param.Phase == MotionPhase.AccelerationWithNegativeJerk)
     {
       return Task.FromResult(
-        Result.Success<MotionAccelerationCalculationResult?>(
+        Result.Success(
           new MotionAccelerationCalculationResult(
             lastPhaseAcceleration + _kinematics.CalculateAcceleration( param.PhaseDuration, -param.Profile.Jerk )
           )
@@ -84,7 +84,7 @@ internal class MotionAccelerationCalculator : IMotionAccelerationCalculator
     if (param.Phase == MotionPhase.ConstantVelocity)
     {
       return Task.FromResult(
-        Result.Success<MotionAccelerationCalculationResult?>(
+        Result.Success(
           new MotionAccelerationCalculationResult( Acceleration.Zero )
         )
       );
@@ -102,7 +102,7 @@ internal class MotionAccelerationCalculator : IMotionAccelerationCalculator
     if (param.Phase == MotionPhase.DecelerationWithNegativeJerk)
     {
       return Task.FromResult(
-        Result.Success<MotionAccelerationCalculationResult?>(
+        Result.Success(
           new MotionAccelerationCalculationResult(
             lastPhaseAcceleration + _kinematics.CalculateAcceleration( param.PhaseDuration, -param.Profile.Jerk )
           )
@@ -120,7 +120,7 @@ internal class MotionAccelerationCalculator : IMotionAccelerationCalculator
     if (param.Phase == MotionPhase.ConstantDeceleration)
     {
       return Task.FromResult(
-        Result.Success<MotionAccelerationCalculationResult?>(
+        Result.Success(
           new MotionAccelerationCalculationResult( -param.Profile.Acceleration )
         )
       );
@@ -131,7 +131,7 @@ internal class MotionAccelerationCalculator : IMotionAccelerationCalculator
       : lastPhaseAcceleration;
 
     return Task.FromResult(
-      Result.Success<MotionAccelerationCalculationResult?>(
+      Result.Success(
         new MotionAccelerationCalculationResult(
           lastPhaseAcceleration + _kinematics.CalculateAcceleration( param.PhaseDuration, param.Profile.Jerk )
         )

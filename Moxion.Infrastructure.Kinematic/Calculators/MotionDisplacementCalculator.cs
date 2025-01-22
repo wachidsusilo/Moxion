@@ -25,14 +25,14 @@ internal class MotionDisplacementCalculator : IMotionDisplacementCalculator
     _accelerationCalculator = accelerationCalculator;
   }
 
-  public async Task<Result<MotionDisplacementCalculationResult?>> Execute(
+  public async Task<Result<MotionDisplacementCalculationResult>> Execute(
     MotionDisplacementCalculationParam param,
     CancellationToken cancellationToken
   )
   {
     if (cancellationToken.IsCancellationRequested)
     {
-      return Result.Error<MotionDisplacementCalculationResult?>( ErrorCode.OperationCancelled );
+      return Result.Error<MotionDisplacementCalculationResult>( ErrorCode.OperationCancelled );
     }
 
     if (param.Phase == MotionPhase.AccelerationWithPositiveJerk)
@@ -47,7 +47,7 @@ internal class MotionDisplacementCalculator : IMotionDisplacementCalculator
 
     if (cancellationToken.IsCancellationRequested)
     {
-      return Result.Error<MotionDisplacementCalculationResult?>( ErrorCode.OperationCancelled );
+      return Result.Error<MotionDisplacementCalculationResult>( ErrorCode.OperationCancelled );
     }
 
     if (param.Phase == MotionPhase.ConstantAcceleration)
@@ -64,7 +64,7 @@ internal class MotionDisplacementCalculator : IMotionDisplacementCalculator
 
     if (cancellationToken.IsCancellationRequested)
     {
-      return Result.Error<MotionDisplacementCalculationResult?>( ErrorCode.OperationCancelled );
+      return Result.Error<MotionDisplacementCalculationResult>( ErrorCode.OperationCancelled );
     }
 
     if (param.Phase == MotionPhase.AccelerationWithNegativeJerk)
@@ -75,12 +75,7 @@ internal class MotionDisplacementCalculator : IMotionDisplacementCalculator
 
       if (velocityResult.HasError)
       {
-        return Result.Error<MotionDisplacementCalculationResult?>( velocityResult.ErrorCode );
-      }
-
-      if (velocityResult.Data is null)
-      {
-        return Result.Error<MotionDisplacementCalculationResult?>( ErrorCode.UnexpectedNullData );
+        return Result.Error<MotionDisplacementCalculationResult>( velocityResult.ErrorCode );
       }
 
       var accelerationParam = new MotionAccelerationCalculationParam( param.Profile, param.Phase, duration );
@@ -88,12 +83,7 @@ internal class MotionDisplacementCalculator : IMotionDisplacementCalculator
 
       if (accelerationResult.HasError)
       {
-        return Result.Error<MotionDisplacementCalculationResult?>( accelerationResult.ErrorCode );
-      }
-
-      if (accelerationResult.Data is null)
-      {
-        return Result.Error<MotionDisplacementCalculationResult?>( ErrorCode.UnexpectedNullData );
+        return Result.Error<MotionDisplacementCalculationResult>( accelerationResult.ErrorCode );
       }
 
       var velocity = velocityResult.Data.Velocity;
@@ -109,7 +99,7 @@ internal class MotionDisplacementCalculator : IMotionDisplacementCalculator
 
     if (cancellationToken.IsCancellationRequested)
     {
-      return Result.Error<MotionDisplacementCalculationResult?>( ErrorCode.OperationCancelled );
+      return Result.Error<MotionDisplacementCalculationResult>( ErrorCode.OperationCancelled );
     }
 
     if (param.Phase == MotionPhase.ConstantVelocity)
@@ -123,7 +113,7 @@ internal class MotionDisplacementCalculator : IMotionDisplacementCalculator
 
     if (cancellationToken.IsCancellationRequested)
     {
-      return Result.Error<MotionDisplacementCalculationResult?>( ErrorCode.OperationCancelled );
+      return Result.Error<MotionDisplacementCalculationResult>( ErrorCode.OperationCancelled );
     }
 
     if (param.Phase == MotionPhase.DecelerationWithNegativeJerk)
@@ -134,12 +124,7 @@ internal class MotionDisplacementCalculator : IMotionDisplacementCalculator
 
       if (velocityResult.HasError)
       {
-        return Result.Error<MotionDisplacementCalculationResult?>( velocityResult.ErrorCode );
-      }
-
-      if (velocityResult.Data is null)
-      {
-        return Result.Error<MotionDisplacementCalculationResult?>( ErrorCode.UnexpectedNullData );
+        return Result.Error<MotionDisplacementCalculationResult>( velocityResult.ErrorCode );
       }
 
       var velocity = velocityResult.Data.Velocity;
@@ -153,7 +138,7 @@ internal class MotionDisplacementCalculator : IMotionDisplacementCalculator
 
     if (cancellationToken.IsCancellationRequested)
     {
-      return Result.Error<MotionDisplacementCalculationResult?>( ErrorCode.OperationCancelled );
+      return Result.Error<MotionDisplacementCalculationResult>( ErrorCode.OperationCancelled );
     }
 
     if (param.Phase == MotionPhase.ConstantDeceleration)
@@ -164,12 +149,7 @@ internal class MotionDisplacementCalculator : IMotionDisplacementCalculator
 
       if (velocityResult.HasError)
       {
-        return Result.Error<MotionDisplacementCalculationResult?>( velocityResult.ErrorCode );
-      }
-
-      if (velocityResult.Data is null)
-      {
-        return Result.Error<MotionDisplacementCalculationResult?>( ErrorCode.UnexpectedNullData );
+        return Result.Error<MotionDisplacementCalculationResult>( velocityResult.ErrorCode );
       }
 
       var velocity = velocityResult.Data.Velocity;
@@ -183,7 +163,7 @@ internal class MotionDisplacementCalculator : IMotionDisplacementCalculator
 
     if (cancellationToken.IsCancellationRequested)
     {
-      return Result.Error<MotionDisplacementCalculationResult?>( ErrorCode.OperationCancelled );
+      return Result.Error<MotionDisplacementCalculationResult>( ErrorCode.OperationCancelled );
     }
 
     var totalDuration = param.Profile.CalculateTotalDuration( MotionPhase.ConstantDeceleration );
@@ -192,12 +172,7 @@ internal class MotionDisplacementCalculator : IMotionDisplacementCalculator
 
     if (initialVelocityResult.HasError)
     {
-      return Result.Error<MotionDisplacementCalculationResult?>( initialVelocityResult.ErrorCode );
-    }
-
-    if (initialVelocityResult.Data is null)
-    {
-      return Result.Error<MotionDisplacementCalculationResult?>( ErrorCode.UnexpectedNullData );
+      return Result.Error<MotionDisplacementCalculationResult>( initialVelocityResult.ErrorCode );
     }
 
     var initialAccelerationParam = new MotionAccelerationCalculationParam( param.Profile, param.Phase, totalDuration );
@@ -206,12 +181,7 @@ internal class MotionDisplacementCalculator : IMotionDisplacementCalculator
 
     if (initialAccelerationResult.HasError)
     {
-      return Result.Error<MotionDisplacementCalculationResult?>( initialAccelerationResult.ErrorCode );
-    }
-
-    if (initialAccelerationResult.Data is null)
-    {
-      return Result.Error<MotionDisplacementCalculationResult?>( ErrorCode.UnexpectedNullData );
+      return Result.Error<MotionDisplacementCalculationResult>( initialAccelerationResult.ErrorCode );
     }
 
     var initialVelocity = initialVelocityResult.Data.Velocity;

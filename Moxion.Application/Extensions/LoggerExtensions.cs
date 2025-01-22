@@ -137,6 +137,46 @@ public static class LoggerExtensions
     );
   }
 
+  public static void LogEnd<TResultData>(
+    this ILogger logger,
+    in Result<TResultData> result,
+    [CallerFilePath] in string sourceFilePath = "",
+    [CallerMemberName] in string methodName = ""
+  )
+  {
+    var className = Path.GetFileNameWithoutExtension( sourceFilePath );
+    var elapsedMilliseconds = new long?();
+    var executionId = new Guid?();
+
+    if (ContextTable.TryGetValue( logger, out var context ))
+    {
+      elapsedMilliseconds = Stopwatch.GetElapsedTime( context.StartTime ).Milliseconds;
+      executionId = context.ExecutionId;
+      ContextTable.Remove( logger );
+    }
+
+    if (result.IsCancelled)
+    {
+      logger.LogWarning(
+        "Execution of {ClassName}::{MethodName} was cancelled with Execution ID {Id} in {ExecutionTime} ms. ErrorCode: {ErrorCode}.",
+        className, methodName, executionId, elapsedMilliseconds, result.ErrorCode
+      );
+    }
+
+    if (result.HasError)
+    {
+      logger.LogError(
+        "Execution of {ClassName}::{MethodName} failed with Execution ID {Id} in {ExecutionTime} ms. ErrorCode: {ErrorCode}.",
+        className, methodName, executionId, elapsedMilliseconds, result.ErrorCode
+      );
+    }
+
+    logger.LogInformation(
+      "Execution of {ClassName}::{MethodName} completed with Execution ID {Id} in {ExecutionTime} ms. ErrorCode: {ErrorCode}.",
+      className, methodName, executionId, elapsedMilliseconds, result.ErrorCode
+    );
+  }
+
   public static void LogEnd(
     this ILogger logger,
     in Result result,
@@ -178,9 +218,92 @@ public static class LoggerExtensions
     );
   }
 
+  public static void LogEnd<TResultData>(
+    this ILogger logger,
+    in Result<TResultData> result,
+    int? dataCount,
+    [CallerFilePath] in string sourceFilePath = "",
+    [CallerMemberName] in string methodName = ""
+  )
+  {
+    var className = Path.GetFileNameWithoutExtension( sourceFilePath );
+    var elapsedMilliseconds = new long?();
+    var executionId = new Guid?();
+
+    if (ContextTable.TryGetValue( logger, out var context ))
+    {
+      elapsedMilliseconds = Stopwatch.GetElapsedTime( context.StartTime ).Milliseconds;
+      executionId = context.ExecutionId;
+      ContextTable.Remove( logger );
+    }
+
+    if (result.IsCancelled)
+    {
+      logger.LogWarning(
+        "Execution of {ClassName}::{MethodName} was cancelled with Execution ID {Id} in {ExecutionTime} ms. ProcessedItems: {DataCount}, ErrorCode: {ErrorCode}.",
+        className, methodName, executionId, elapsedMilliseconds, dataCount, result.ErrorCode
+      );
+    }
+
+    if (result.HasError)
+    {
+      logger.LogError(
+        "Execution of {ClassName}::{MethodName} failed with Execution ID {Id} in {ExecutionTime} ms. ProcessedItems: {DataCount}, ErrorCode: {ErrorCode}.",
+        className, methodName, executionId, elapsedMilliseconds, dataCount, result.ErrorCode
+      );
+    }
+
+    logger.LogInformation(
+      "Execution of {ClassName}::{MethodName} completed with Execution ID {Id} in {ExecutionTime} ms. ProcessedItems: {DataCount}, ErrorCode: {ErrorCode}.",
+      className, methodName, executionId, elapsedMilliseconds, dataCount, result.ErrorCode
+    );
+  }
+
   public static void LogEnd<TOutput>(
     this ILogger logger,
     in Result result,
+    in string outputName,
+    in TOutput output,
+    [CallerFilePath] in string sourceFilePath = "",
+    [CallerMemberName] in string methodName = ""
+  )
+  {
+    var className = Path.GetFileNameWithoutExtension( sourceFilePath );
+    var elapsedMilliseconds = new long?();
+    var executionId = new Guid?();
+
+    if (ContextTable.TryGetValue( logger, out var context ))
+    {
+      elapsedMilliseconds = Stopwatch.GetElapsedTime( context.StartTime ).Milliseconds;
+      executionId = context.ExecutionId;
+      ContextTable.Remove( logger );
+    }
+
+    if (result.IsCancelled)
+    {
+      logger.LogWarning(
+        "Execution of {ClassName}::{MethodName} was cancelled with Execution ID {Id} in {ExecutionTime} ms. OutputName: {OutputName}, OutputData={@OutputData}, ErrorCode: {ErrorCode}.",
+        className, methodName, executionId, elapsedMilliseconds, outputName, output, result.ErrorCode
+      );
+    }
+
+    if (result.HasError)
+    {
+      logger.LogError(
+        "Execution of {ClassName}::{MethodName} failed with Execution ID {Id} in {ExecutionTime} ms. OutputName: {OutputName}, OutputData={@OutputData}, ErrorCode: {ErrorCode}.",
+        className, methodName, executionId, elapsedMilliseconds, outputName, output, result.ErrorCode
+      );
+    }
+
+    logger.LogInformation(
+      "Execution of {ClassName}::{MethodName} completed with Execution ID {Id} in {ExecutionTime} ms. OutputName: {OutputName}, OutputData={@OutputData}, ErrorCode: {ErrorCode}.",
+      className, methodName, executionId, elapsedMilliseconds, outputName, output, result.ErrorCode
+    );
+  }
+
+  public static void LogEnd<TResultData, TOutput>(
+    this ILogger logger,
+    in Result<TResultData> result,
     in string outputName,
     in TOutput output,
     [CallerFilePath] in string sourceFilePath = "",

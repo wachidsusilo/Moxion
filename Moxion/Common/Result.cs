@@ -2,14 +2,14 @@
 
 namespace Moxion.Common;
 
-public record Result
+public readonly record struct Result
 {
   public ErrorCode ErrorCode { get; }
   public Exception? Exception { get; }
   public bool HasError => ErrorCode != ErrorCode.NoError;
   public bool IsCancelled => ErrorCode == ErrorCode.OperationCancelled;
 
-  protected Result( ErrorCode errorCode, Exception? exception )
+  private Result( ErrorCode errorCode, Exception? exception )
   {
     ErrorCode = errorCode;
     Exception = exception;
@@ -36,8 +36,8 @@ public record Result
 
   public static Result Error( ErrorCode errorCode, Exception exception ) => new( errorCode, exception );
 
-  public static Result<TData?> Error<TData>( ErrorCode errorCode ) where TData : class? =>
-    new( errorCode, null, null );
+  public static Result<TData?> Error<TData>( ErrorCode errorCode ) =>
+    new( errorCode, default, null );
 
   public static Result<TData> Error<TData>( ErrorCode errorCode, TData data ) => new( errorCode, data, null );
 
@@ -45,13 +45,19 @@ public record Result
     new( errorCode, data, exception );
 }
 
-public record Result<TData> : Result
+public readonly record struct Result<TData>
 {
+  public ErrorCode ErrorCode { get; }
   public TData Data { get; }
+  public Exception? Exception { get; }
+  public bool HasError => ErrorCode != ErrorCode.NoError;
+  public bool IsCancelled => ErrorCode == ErrorCode.OperationCancelled;
 
-  internal Result( ErrorCode errorCode, TData data, Exception? exception ) : base( errorCode, exception )
+  internal Result( ErrorCode errorCode, TData data, Exception? exception )
   {
+    ErrorCode = errorCode;
     Data = data;
+    Exception = exception;
   }
 
   public static implicit operator Result<TData>( TData data ) => new( ErrorCode.NoError, data, null );

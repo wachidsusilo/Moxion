@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Moxion.Application.Abstractions.Simulators.Kinematic;
 using Moxion.Application.Extensions;
 using Moxion.Application.Shared.Simulators.Params;
@@ -39,6 +38,6 @@ internal class SimulateMotionQueryHandler : IQueryHandler<SimulateMotionQuery, S
 
     _logger.LogEnd( result );
 
-    return new SimulateMotionQueryResult( result.ErrorCode, result.Data?.Profile, result.Data?.MotionData );
+    return new SimulateMotionQueryResult( result.ErrorCode, result.Data.Profile, result.Data.MotionData );
   }
 }

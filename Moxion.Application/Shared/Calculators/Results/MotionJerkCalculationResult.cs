@@ -3,4 +3,4 @@ using Moxion.Common.Values.Derived;
 
 namespace Moxion.Application.Shared.Calculators.Results;
 
-internal record MotionJerkCalculationResult( Jerk Jerk ) : ICalculationResult;
+internal readonly record struct MotionJerkCalculationResult( Jerk Jerk ) : ICalculationResult;
