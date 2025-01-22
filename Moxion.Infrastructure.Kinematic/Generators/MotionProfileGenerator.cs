@@ -275,7 +275,7 @@ internal class MotionProfileGenerator : IMotionProfileGenerator
     var profileResult = new MotionProfile(
       param.Displacement,
       param.Velocity,
-      Acceleration.Zero,
+      param.Acceleration,
       param.Jerk,
       timeAtMaxAcceleration,
       accelerationPhaseDuration,
