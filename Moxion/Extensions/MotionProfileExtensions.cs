@@ -8,7 +8,7 @@ public static class MotionProfileExtensions
 {
   public static Time GetTotalDuration( this MotionProfile profile )
   {
-    return 4 * profile.JerkDuration + 4 * profile.AccelerationDuration + profile.SteadyMotionDuration;
+    return 4 * profile.JerkDuration + 2 * profile.AccelerationDuration + profile.SteadyMotionDuration;
   }
 
   public static MotionProfileType GetProfileType( this MotionProfile profile )
