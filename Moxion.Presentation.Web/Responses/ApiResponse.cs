@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Moxion.Presentation.Abstractions;
 using Moxion.Presentation.Abstractions.Transport;
 
 namespace Moxion.Presentation.Web.Responses;
