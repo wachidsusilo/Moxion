@@ -13,7 +13,7 @@ function MotionChart({data}: MotionChartProps) {
                 <VictoryChart height={250} colorScale='blue' padding={{left: 50, top: 50, bottom: 50, right: 50}} containerComponent={<VictoryVoronoiContainer />}>
                     <VictoryAxis crossAxis style={{axis: {stroke: 'gray'}, tickLabels: { fill: "gray", fontSize: 10 }}} />
                     <VictoryAxis dependentAxis style={{axis: {stroke: 'gray'}, tickLabels: { fill: "gray", fontSize: 10 }}}/>
-                    <VictoryScatter data={data.positionData} style={{data: {stroke: 'blue', strokeWidth: 1}}} size={1} labels={({index}) => data.phaseData[index].phase } labelComponent={<VictoryTooltip style={{ fontSize: 10, fill: "white" }} flyoutStyle={{ fill: "black", stroke: "gray" }} />}/>
+                    <VictoryScatter data={data.positionData} style={{data: {stroke: 'blue', strokeWidth: 1}}} size={1} labels={({index}) => `${data.phaseData[index].phase}\n(${data.positionData[index].x.toFixed(2)}, ${data.positionData[index].y.toFixed(2)})` } labelComponent={<VictoryTooltip style={{ fontSize: 10, fill: "white" }} flyoutStyle={{ fill: "black", stroke: "gray" }} />}/>
                     <VictoryLine data={data.positionData} style={{data: {stroke: 'blue', strokeWidth: 1}}}/>
                 </VictoryChart>
             </div>
@@ -22,7 +22,7 @@ function MotionChart({data}: MotionChartProps) {
                 <VictoryChart height={250} colorScale='blue' padding={{left: 50, top: 50, bottom: 50, right: 50}} containerComponent={<VictoryVoronoiContainer />}>
                     <VictoryAxis crossAxis style={{axis: {stroke: 'gray'}, tickLabels: { fill: "gray", fontSize: 10 }}} />
                     <VictoryAxis dependentAxis style={{axis: {stroke: 'gray'}, tickLabels: { fill: "gray", fontSize: 10 }}}/>
-                    <VictoryScatter data={data.velocityData} style={{data: {stroke: 'green', strokeWidth: 1}}} size={1} labels={({index}) => data.phaseData[index].phase } labelComponent={<VictoryTooltip style={{ fontSize: 10, fill: "white" }} flyoutStyle={{ fill: "black", stroke: "gray" }} />}/>
+                    <VictoryScatter data={data.velocityData} style={{data: {stroke: 'green', strokeWidth: 1}}} size={1} labels={({index}) => `${data.phaseData[index].phase}\n(${data.velocityData[index].x.toFixed(2)}, ${data.velocityData[index].y.toFixed(2)})` } labelComponent={<VictoryTooltip style={{ fontSize: 10, fill: "white" }} flyoutStyle={{ fill: "black", stroke: "gray" }} />}/>
                     <VictoryLine data={data.velocityData} style={{data: {stroke: 'green', strokeWidth: 1}}}/>
                 </VictoryChart>
             </div>
@@ -31,7 +31,7 @@ function MotionChart({data}: MotionChartProps) {
                 <VictoryChart height={250} colorScale='blue' padding={{left: 50, top: 50, bottom: 50, right: 50}} containerComponent={<VictoryVoronoiContainer />}>
                     <VictoryAxis crossAxis style={{axis: {stroke: 'gray'}, tickLabels: { fill: "gray", fontSize: 10 }}} />
                     <VictoryAxis dependentAxis style={{axis: {stroke: 'gray'}, tickLabels: { fill: "gray", fontSize: 10 }}}/>
-                    <VictoryScatter data={data.accelerationData} style={{data: {stroke: 'purple', strokeWidth: 1}}} size={1} labels={({index}) => data.phaseData[index].phase } labelComponent={<VictoryTooltip style={{ fontSize: 10, fill: "white" }} flyoutStyle={{ fill: "black", stroke: "gray" }} />}/>
+                    <VictoryScatter data={data.accelerationData} style={{data: {stroke: 'purple', strokeWidth: 1}}} size={1} labels={({index}) => `${data.phaseData[index].phase}\n(${data.accelerationData[index].x.toFixed(2)}, ${data.accelerationData[index].y.toFixed(2)})` } labelComponent={<VictoryTooltip style={{ fontSize: 10, fill: "white" }} flyoutStyle={{ fill: "black", stroke: "gray" }} />}/>
                     <VictoryLine data={data.accelerationData} style={{data: {stroke: 'purple', strokeWidth: 1}}}/>
                 </VictoryChart>
             </div>
@@ -40,7 +40,7 @@ function MotionChart({data}: MotionChartProps) {
                 <VictoryChart height={250} colorScale='blue' padding={{left: 50, top: 50, bottom: 50, right: 50}} containerComponent={<VictoryVoronoiContainer />}>
                     <VictoryAxis crossAxis style={{axis: {stroke: 'gray'}, tickLabels: { fill: "gray", fontSize: 10 }}} />
                     <VictoryAxis dependentAxis style={{axis: {stroke: 'gray'}, tickLabels: { fill: "gray", fontSize: 10 }}}/>
-                    <VictoryScatter data={data.jerkData} style={{data: {stroke: 'orange', strokeWidth: 1}}} size={1} labels={({index}) => data.phaseData[index].phase } labelComponent={<VictoryTooltip style={{ fontSize: 10, fill: "white" }} flyoutStyle={{ fill: "black", stroke: "gray" }} />}/>
+                    <VictoryScatter data={data.jerkData} style={{data: {stroke: 'orange', strokeWidth: 1}}} size={1} labels={({index}) => `${data.phaseData[index].phase}\n(${data.jerkData[index].x.toFixed(2)}, ${data.jerkData[index].y.toFixed(2)})` } labelComponent={<VictoryTooltip style={{ fontSize: 10, fill: "white" }} flyoutStyle={{ fill: "black", stroke: "gray" }} />}/>
                     <VictoryLine data={data.jerkData} style={{data: {stroke: 'orange', strokeWidth: 1}}}/>
                 </VictoryChart>
             </div>
