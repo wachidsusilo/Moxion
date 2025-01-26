@@ -6,11 +6,12 @@ namespace Moxion.Common.Values;
 
 public readonly record struct Number( decimal Value ) : INumber<Number>
 {
-  public static int Radix => 10;
-  public static Number One => new( 1 );
-  public static Number Zero => new( 0 );
-  public static Number AdditiveIdentity => new( 0 );
-  public static Number MultiplicativeIdentity => new( 1 );
+  public static Number Epsilon { get; } = new( 1e-28m );
+  public static int Radix { get; } = 10;
+  public static Number One { get; } = new( 1 );
+  public static Number Zero { get; } = new( 0 );
+  public static Number AdditiveIdentity { get; } = new( 0 );
+  public static Number MultiplicativeIdentity { get; } = new( 1 );
 
   public sbyte ToSbyte()
   {
@@ -67,16 +68,109 @@ public readonly record struct Number( decimal Value ) : INumber<Number>
     return Value;
   }
 
-  public Number Sqrt()
+  public Number SquareRoot()
   {
-    // TODO: _ws Find better implementation
-    return Math.Sqrt( ToDouble() );
+    if (Value < 0)
+    {
+      throw new ArgumentException( "Number must be non-negative." );
+    }
+
+    if (Value == 0)
+    {
+      return 0m;
+    }
+
+    // Scale the value to the range [1, 100].
+    // This is done to reduce the iteration needed for the guess value
+    // to converge into the actual value.
+    var scaledValue = Value;
+    var scalingFactor = 1m;
+
+    while (scaledValue >= 100m)
+    {
+      scaledValue /= 100m;
+      scalingFactor *= 10m;
+    }
+
+    while (scaledValue < 1m)
+    {
+      scaledValue *= 100m;
+      scalingFactor /= 10m;
+    }
+
+    // Set initial guess for the scaled value
+    var currentGuess = scaledValue < 1m ? scaledValue * 2m : scaledValue / 2m;
+    decimal previousGuess;
+
+    // Limit the iteration count to avoid infinite loop if an oscillation occurs
+    const int maximumIterations = 100;
+    var iterationCount = 0;
+
+    // Apply Babylonian iteration for square root: xₙ₊₁ = (xₙ + S / xₙ) / 2
+    do
+    {
+      previousGuess = currentGuess;
+      currentGuess = ( previousGuess + scaledValue / previousGuess ) / 2m;
+      iterationCount++;
+    } while (Math.Abs( currentGuess - previousGuess ) > Epsilon.Value && iterationCount <= maximumIterations);
+
+    return currentGuess * scalingFactor;
   }
 
-  public Number Pow( Number exponent )
+  public Number CubeRoot()
   {
-    // TODO: _ws Find better implementation
-    return Math.Pow( ToDouble(), exponent.ToDouble() );
+    if (Value == 0)
+    {
+      return 0m;
+    }
+
+    var isNegative = Value < 0;
+    var absValue = Math.Abs( Value );
+
+    var scaledValue = absValue;
+    var scalingFactor = 1m;
+
+    // Scale the value to the range [1, 1000].
+    // This is done to reduce the iteration needed for the guess value
+    // to converge into the actual value.
+    while (scaledValue >= 1000m)
+    {
+      scaledValue /= 1000m;
+      scalingFactor *= 10m;
+    }
+
+    while (scaledValue < 1m)
+    {
+      scaledValue *= 1000m;
+      scalingFactor /= 10m;
+    }
+
+    // Initial guess for the scaled value
+    var currentGuess = 0m;
+    decimal previousGuess;
+
+    // Find the largest integer n where (n+1)^3 <= M
+    while ((currentGuess + 1m) * (currentGuess + 1m) * (currentGuess + 1m) <= scaledValue)
+    {
+      currentGuess++;
+    }
+
+    currentGuess += 1m;
+
+    // Limit the iteration count to avoid infinite loop if an oscillation occurs
+    const int maximumIterations = 100;
+    var iterationCount = 0;
+
+    // Newton-Raphson iteration for cube root: xₙ₊₁ = (2xₙ + M/(xₙ²)) / 3
+    do
+    {
+      previousGuess = currentGuess;
+      currentGuess = ( 2 * previousGuess + scaledValue / ( previousGuess * previousGuess ) ) / 3m;
+      iterationCount++;
+    } while (Math.Abs( currentGuess - previousGuess ) > Epsilon.Value && iterationCount < maximumIterations);
+
+    var result = currentGuess * scalingFactor;
+    return isNegative ? -result : result;
   }
 
   public override int GetHashCode()
