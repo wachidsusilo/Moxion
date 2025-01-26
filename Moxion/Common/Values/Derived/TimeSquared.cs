@@ -13,7 +13,7 @@ public readonly record struct TimeSquared( Number Value ) : IValue<TimeSquared>
 
   public Time SquareRoot()
   {
-    return new Time( Value.Sqrt() );
+    return new Time( Value.SquareRoot() );
   }
 
   #region Operators
