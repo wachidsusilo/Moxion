@@ -18,6 +18,11 @@ public readonly record struct Velocity( Number Value ) : IValue<Velocity>
     return new Position( left.Value * right.Value );
   }
 
+  public static VelocitySquared operator *( Velocity left, Velocity right )
+  {
+    return new VelocitySquared( left.Value * right.Value );
+  }
+
   public static Time operator /( Velocity left, Acceleration right )
   {
     if (right.IsZero)

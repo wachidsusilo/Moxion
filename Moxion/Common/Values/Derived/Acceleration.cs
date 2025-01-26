@@ -18,6 +18,11 @@ public readonly record struct Acceleration( Number Value ) : IValue<Acceleration
     return new Position( left.Value * right.Value );
   }
 
+  public static VelocitySquared operator *( Acceleration left, Position right )
+  {
+    return new VelocitySquared( left.Value * right.Value );
+  }
+
   public static Velocity operator *( Acceleration left, Time right )
   {
     return new Velocity( left.Value * right.Value );
