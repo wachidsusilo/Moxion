@@ -22,7 +22,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moxion.Application.Feature"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Domain", "Domain", "{3EDF3AE0-F150-45B3-A800-B814C961B9A5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moxion.CodeAnalysis", "Moxion.CodeAnalysis\Moxion.CodeAnalysis\Moxion.CodeAnalysis.csproj", "{46BF909B-D700-4A80-95DE-4B93802E1A68}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moxion.CodeAnalysis", "Moxion.CodeAnalysis\Moxion.CodeAnalysis.csproj", "{46BF909B-D700-4A80-95DE-4B93802E1A68}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moxion.Tests", "Moxion.Tests\Moxion.Tests.csproj", "{C24C7608-03D5-4921-95CE-28F4183C692A}"
 EndProject
