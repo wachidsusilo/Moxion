@@ -12,7 +12,7 @@ internal class Kinematics : IKinematics
   // v = v₀ + a₀t + ½jt²
   // s = s₀ + v₀t + ½a₀t² + ⅙jt³
 
-  public Position CalculatePosition( Time time, Velocity velocity )
+  public Position CalculateLinearPosition( Time time, Velocity velocity )
   {
     // s = s₀ + vt
     // where s₀ is zero
@@ -20,7 +20,7 @@ internal class Kinematics : IKinematics
     return velocity * time;
   }
 
-  public Time CalculateTime( Position position, Velocity velocity )
+  public Time CalculateLinearTime( Position position, Velocity velocity )
   {
     // s = s₀ + vt
     // where s₀ is zero
@@ -32,7 +32,7 @@ internal class Kinematics : IKinematics
 
   #region Quadratic Motion
 
-  public Position CalculatePosition( Time time, Acceleration acceleration )
+  public Position CalculateQuadraticPosition( Time time, Acceleration acceleration )
   {
     // s = s₀ + v₀t + ½at²
     // where s₀ and v₀ are zero
@@ -40,15 +40,15 @@ internal class Kinematics : IKinematics
     return ( ( acceleration * time * time ) / 2 );
   }
 
-  public Position CalculatePosition( Time time, Velocity initialVelocity, Acceleration initialAcceleration )
+  public Position CalculateQuadraticPosition( Time time, Velocity initialVelocity, Acceleration acceleration )
   {
     // s = s₀ + v₀t + ½at²
     // where s₀ is zero
     // s = v₀t + ½at²
-    return ( initialVelocity * time ) + ( ( initialAcceleration * time * time ) / 2 );
+    return ( initialVelocity * time ) + ( ( acceleration * time * time ) / 2 );
   }
 
-  public Position CalculatePosition(
+  public Position CalculateQuadraticPosition(
     Time time,
     Position initialPosition,
     Velocity initialVelocity,
@@ -59,7 +59,7 @@ internal class Kinematics : IKinematics
     return initialPosition + ( initialVelocity * time ) + ( ( acceleration * time.Squared() ) / 2 );
   }
 
-  public Time CalculateTime( Position position, Acceleration acceleration )
+  public Time CalculateQuadraticTime( Position position, Acceleration acceleration )
   {
     // s = s₀ + v₀t + ½at²
     // where s₀ and v₀ are zero
@@ -68,7 +68,26 @@ internal class Kinematics : IKinematics
     return ( 2 * position / acceleration ).SquareRoot();
   }
 
-  public Time CalculateTime( Velocity velocity, Acceleration acceleration )
+  public Time CalculateQuadraticTime( Position position, Velocity initialVelocity, Acceleration acceleration )
+  {
+    // s = s₀ + v₀t + ½at²
+    // where s₀ is zero
+    // s = v₀t + ½at²
+    // ½at² + v₀t - s = 0
+    // at² + 2v₀t - 2s = 0
+    // find the root of a quadratic equation:
+    // y = (-b ± √(b² - 4ac)) / 2a
+    // t = (-2v₀ ± √((2v₀)² - 4a(-2s))) / 2a
+    // t = (-2v₀ ± √(4(v₀)² + 8as)) / 2a
+    // t = (-v₀ ± √((v₀)² + 2as)) / a
+    // time cannot be negative, so we only care about the positive result:
+    // t = (-v₀ + √((v₀)² + 2as)) / a
+    var discriminant = ( initialVelocity * initialVelocity ) + ( 2 * acceleration * position );
+
+    return ( -initialVelocity + discriminant.SquareRoot() ) / acceleration;
+  }
+
+  public Time CalculateQuadraticTime( Velocity velocity, Acceleration acceleration )
   {
     // v = v₀ + at
     // where v₀ is zero
@@ -77,7 +96,7 @@ internal class Kinematics : IKinematics
     return velocity / acceleration;
   }
 
-  public Velocity CalculateVelocity( Time time, Acceleration acceleration )
+  public Velocity CalculateQuadraticVelocity( Time time, Acceleration acceleration )
   {
     // v = v₀ + at
     // where v₀ is zero
@@ -89,7 +108,7 @@ internal class Kinematics : IKinematics
 
   #region Cubic Motion
 
-  public Position CalculatePosition( Time time, Jerk jerk )
+  public Position CalculateCubicPosition( Time time, Jerk jerk )
   {
     // s = s₀ + v₀t + ½a₀t² + ⅙jt³
     // where s₀, v₀ and a₀ are zero
@@ -97,7 +116,7 @@ internal class Kinematics : IKinematics
     return jerk * time.Cubed() / 6;
   }
 
-  public Position CalculatePosition( Time time, Velocity initialVelocity, Jerk jerk )
+  public Position CalculateCubicPosition( Time time, Velocity initialVelocity, Jerk jerk )
   {
     // s = s₀ + v₀t + ½a₀t² + ⅙jt³
     // where s₀ and a₀ are zero
@@ -105,7 +124,8 @@ internal class Kinematics : IKinematics
     return ( initialVelocity * time ) + ( jerk * time.Cubed() / 6 );
   }
 
-  public Position CalculatePosition( Time time, Velocity initialVelocity, Acceleration initialAcceleration, Jerk jerk )
+  public Position CalculateCubicPosition( Time time, Velocity initialVelocity, Acceleration initialAcceleration,
+    Jerk jerk )
   {
     // s = s₀ + v₀t + ½a₀t² + ⅙jt³
     // s = v₀t + ½a₀t² + ⅙jt³
@@ -114,7 +134,7 @@ internal class Kinematics : IKinematics
            + ( jerk * time.Cubed() / 6 );
   }
 
-  public Time CalculateTime( Position position, Jerk jerk )
+  public Time CalculateCubicTime( Position position, Jerk jerk )
   {
     // s = s₀ + v₀t + ½a₀t² + ⅙jt³
     // where s₀, v₀ and a₀ are zero
@@ -123,7 +143,16 @@ internal class Kinematics : IKinematics
     return ( 6 * position / jerk ).CubeRoot();
   }
 
-  public Time CalculateTime( Acceleration acceleration, Jerk jerk )
+  public Time CalculateCubicTime( Velocity velocity, Jerk jerk )
+  {
+    // v = v₀ + a₀t + ½jt²
+    // where v₀ and a₀ are zero
+    // v = ½jt²
+    // t = √(2v/j)
+    return ( 2 * velocity / jerk ).SquareRoot();
+  }
+
+  public Time CalculateCubicTime( Acceleration acceleration, Jerk jerk )
   {
     // a = a₀ + jt
     // where a₀ is zero
@@ -132,7 +161,7 @@ internal class Kinematics : IKinematics
     return acceleration / jerk;
   }
 
-  public Velocity CalculateVelocity( Time time, Jerk jerk )
+  public Velocity CalculateCubicVelocity( Time time, Jerk jerk )
   {
     // v = v₀ + a₀t + ½jt²
     // where v₀ and a₀ are zero
@@ -140,7 +169,7 @@ internal class Kinematics : IKinematics
     return jerk * time.Squared() / 2;
   }
 
-  public Velocity CalculateVelocity( Time time, Acceleration initialAcceleration, Jerk jerk )
+  public Velocity CalculateCubicVelocity( Time time, Acceleration initialAcceleration, Jerk jerk )
   {
     // v = v₀ + a₀t + ½jt²
     // where v₀ is zero
@@ -148,7 +177,7 @@ internal class Kinematics : IKinematics
     return ( initialAcceleration * time ) + ( jerk * time.Squared() / 2 );
   }
 
-  public Acceleration CalculateAcceleration( Time time, Jerk jerk )
+  public Acceleration CalculateCubicAcceleration( Time time, Jerk jerk )
   {
     // v = v₀ + a₀t + ½jt²
     // where v₀ is zero
@@ -156,44 +185,17 @@ internal class Kinematics : IKinematics
     return jerk * time;
   }
 
-  public Time CalculateJerkDuration( Velocity maxVelocity, Jerk jerk )
+  /// <inheritdoc/>
+  public Time CalculateCubicJerkDuration( Position totalDisplacement, Jerk jerk )
   {
-    // Assumptions:
-    // - The duration of positive and negative jerks are equal
-    // - The contribution of positive and negative jerks to the velocity are identical
-    // 
-    // Positive Jerk phase:
-    //   Conditions:
-    //   - Initial position is zero
-    //   - Initial velocity is zero
-    //   - Initial acceleration is zero
-    //
-    //   Therefore, the velocity at the end of positive jerk phase is given by:
-    //     v₁ = ½j(t₁)²
-    //   While the acceleration at the end of positive jerk phase is given by:
-    //     a₁ = jt₁
-    //
-    // Negative Jerk phase:
-    //   Conditions:
-    //   - Initial velocity is v₁
-    //   - Initial acceleration is a₁
-    //
-    //   In the negative jerk phase, the acceleration at any given point in time is given by:
-    //     a(t) = a₁ - jt = jt₁ - jt
-    //   The velocity during the negative jerk phase is given by:
-    //     v₂ = v₁ + ∫a(t)dt
-    //     v₂ = v₁ + ∫(jt₁ - jt)dt
-    //     v₂ = v₁ + ∫(jt₁)dt - ∫(jt)dt
-    //   By applying finite integration from 0 to t₂, we got:
-    //     v₂ = v₁ + jt₁t₂ - ½j(t₂)²
-    //     v₂ = ½j(t₁)² + jt₁t₂ - ½j(t₂)²
-    //   At the end of negative jerk phase, the velocity is maximum.
-    //   Therefore, v₂ is the maximum velocity of the motion.
-    //   We assume that the time is symmetric, which means t₁ is equal to t₂.
-    //   By substituting t₁ = t₂ to the previous equation, we got:
-    //    v₂ = ½j(t₂)² + j(t₂)² - ½j(t₂)²
-    //    v₂ = j(t₂)²
-    //    t₁ = t₂ = √(v₂/j)
+    var halfDisplacement = totalDisplacement / 2;
+
+    return ( halfDisplacement / jerk ).CubeRoot();
+  }
+
+  /// <inheritdoc/>
+  public Time CalculateCubicJerkDuration( Velocity maxVelocity, Jerk jerk )
+  {
     return ( maxVelocity / jerk ).SquareRoot();
   }
 
