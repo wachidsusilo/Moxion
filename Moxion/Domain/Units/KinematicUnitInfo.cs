@@ -4,21 +4,21 @@ using Moxion.Common.Units;
 namespace Moxion.Domain.Units;
 
 public readonly record struct KinematicUnitInfo(
-  DisplacementUnitInfo Displacement,
+  PositionUnitInfo Position,
   VelocityUnitInfo Velocity,
   AccelerationUnitInfo Acceleration,
   JerkUnitInfo Jerk,
-  DurationUnitInfo Duration
+  TimeUnitInfo Time
 ) : IUnitInfo<KinematicUnitInfo>
 {
   public static KinematicUnitInfo Create( PositionUnit positionUnit, TimeUnit timeUnit )
   {
     return new KinematicUnitInfo(
-      new DisplacementUnitInfo( positionUnit ),
+      new PositionUnitInfo( positionUnit ),
       new VelocityUnitInfo( positionUnit, timeUnit ),
       new AccelerationUnitInfo( positionUnit, timeUnit ),
       new JerkUnitInfo( positionUnit, timeUnit ),
-      new DurationUnitInfo( timeUnit )
+      new TimeUnitInfo( timeUnit )
     );
   }
 }

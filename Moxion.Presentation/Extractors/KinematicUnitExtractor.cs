@@ -31,11 +31,11 @@ internal class KinematicUnitExtractor : IKinematicUnitExtractor
     }
 
     var result = new KinematicUnitInfo(
-      new DisplacementUnitInfo( request.Displacement.Unit ),
+      new PositionUnitInfo( request.Displacement.Unit ),
       new VelocityUnitInfo( request.Velocity.PositionUnit, request.Velocity.TimeUnit ),
       new AccelerationUnitInfo( request.Acceleration.PositionUnit, request.Acceleration.TimeUnit ),
       new JerkUnitInfo( request.Jerk.PositionUnit, request.Jerk.TimeUnit ),
-      new DurationUnitInfo( request.TimeIntervalUnit )
+      new TimeUnitInfo( request.TimeIntervalUnit )
     );
 
     _logger.LogEnd( ErrorCode.NoError );

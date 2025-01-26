@@ -100,8 +100,8 @@ internal class MotionDataFactory : IMotionDataFactory
   {
     var timeResult = await _unitConverter.Convert(
       motionData.Time,
-      sourceUnit.Duration.Unit,
-      destinationUnit.Duration.Unit
+      sourceUnit.Time.Unit,
+      destinationUnit.Time.Unit
     );
 
     if (timeResult.HasError)
@@ -116,8 +116,8 @@ internal class MotionDataFactory : IMotionDataFactory
 
     var positionResult = await _unitConverter.Convert(
       motionData.Position,
-      sourceUnit.Displacement.Unit,
-      destinationUnit.Displacement.Unit
+      sourceUnit.Position.Unit,
+      destinationUnit.Position.Unit
     );
 
     if (positionResult.HasError)
