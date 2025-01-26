@@ -61,6 +61,7 @@ export function MotionSimulationProvider({children}: IMotionSimulationProviderPr
         const response = await KinematicApi.simulate(KinematicSimulateRequest.fromParam(param))
 
         if (!response || !response.data) {
+            setData(new MotionSimulationData())
             setError(response?.errorCode ?? 'UnknownError')
             setIsLoading(false)
             return
@@ -83,13 +84,13 @@ export function MotionSimulationProvider({children}: IMotionSimulationProviderPr
         }
 
         const simulationData = new MotionSimulationData(
-            response.profile ?? new MotionProfile(),
+            MotionProfile.from(response.profile),
             positionData,
             velocityData,
             accelerationData,
             jerkData,
             phaseData,
-            response.unitInfo ?? new KinematicUnitInfo()
+            KinematicUnitInfo.from(response.unitInfo)
         );
 
         setData(simulationData)
