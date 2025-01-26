@@ -1,9 +1,12 @@
-﻿using Moxion.Application.Abstractions.Calculators.Kinematic;
+﻿using Microsoft.Extensions.Logging;
+using Moxion.Application.Abstractions.Calculators.Kinematic;
 using Moxion.Application.Abstractions.Math;
+using Moxion.Application.Extensions;
 using Moxion.Application.Shared.Calculators.Params;
 using Moxion.Application.Shared.Calculators.Results;
 using Moxion.Common;
 using Moxion.Common.Enumerations;
+using Moxion.Common.Values;
 using Moxion.Infrastructure.Kinematic.Extensions;
 
 namespace Moxion.Infrastructure.Kinematic.Calculators;
@@ -11,21 +14,15 @@ namespace Moxion.Infrastructure.Kinematic.Calculators;
 internal class MotionDisplacementCalculator : IMotionDisplacementCalculator
 {
   private readonly IKinematics _kinematics;
-  private readonly IMotionVelocityCalculator _velocityCalculator;
-  private readonly IMotionAccelerationCalculator _accelerationCalculator;
-  private readonly IMotionPhaseCalculator _motionPhaseCalculator;
+  private readonly ILogger<MotionDisplacementCalculator> _logger;
 
   public MotionDisplacementCalculator(
     IKinematics kinematics,
-    IMotionVelocityCalculator velocityCalculator,
-    IMotionAccelerationCalculator accelerationCalculator,
-    IMotionPhaseCalculator motionPhaseCalculator
+    ILogger<MotionDisplacementCalculator> logger
   )
   {
     _kinematics = kinematics;
-    _velocityCalculator = velocityCalculator;
-    _accelerationCalculator = accelerationCalculator;
-    _motionPhaseCalculator = motionPhaseCalculator;
+    _logger = logger;
   }
 
   public async Task<Result<MotionDisplacementCalculationResult>> Execute(
@@ -33,173 +30,164 @@ internal class MotionDisplacementCalculator : IMotionDisplacementCalculator
     CancellationToken cancellationToken
   )
   {
+    _logger.LogStart();
+
+    var result = await ExecuteInternal( param, cancellationToken );
+
+    _logger.LogEnd( result );
+
+    return result;
+  }
+
+  private Task<Result<MotionDisplacementCalculationResult>> ExecuteInternal(
+    MotionCalculationParam param,
+    CancellationToken cancellationToken
+  )
+  {
     if (cancellationToken.IsCancellationRequested)
     {
-      return Result.Error<MotionDisplacementCalculationResult>( ErrorCode.OperationCancelled );
+      return Task.FromResult( Result.Error<MotionDisplacementCalculationResult>( ErrorCode.OperationCancelled ) );
     }
 
-    var phaseResult = await _motionPhaseCalculator.Execute( param, cancellationToken );
-
-    if (phaseResult.HasError)
-    {
-      return Result.Error<MotionDisplacementCalculationResult>( phaseResult.ErrorCode );
-    }
-
-    var phase = phaseResult.Data.MotionPhase;
-    var phaseDuration = param.Profile.CalculateDuration( param.Time, phase );
-
-    if (phase == MotionPhase.AccelerationWithPositiveJerk)
-    {
-      return new MotionDisplacementCalculationResult(
-        _kinematics.CalculatePosition( phaseDuration, param.Profile.Jerk )
-      );
-    }
-
-    var jerkDisplacement = _kinematics.CalculatePosition( param.Profile.JerkDuration, param.Profile.Jerk );
-    var totalDisplacement = jerkDisplacement;
-
-    if (cancellationToken.IsCancellationRequested)
-    {
-      return Result.Error<MotionDisplacementCalculationResult>( ErrorCode.OperationCancelled );
-    }
-
-    if (phase == MotionPhase.ConstantAcceleration)
-    {
-      return new MotionDisplacementCalculationResult(
-        totalDisplacement + _kinematics.CalculatePosition( phaseDuration, param.Profile.Acceleration )
-      );
-    }
-
-    var accelerationDisplacement =
-      _kinematics.CalculatePosition( param.Profile.AccelerationDuration, param.Profile.Acceleration );
-
-    totalDisplacement += accelerationDisplacement;
-
-    if (cancellationToken.IsCancellationRequested)
-    {
-      return Result.Error<MotionDisplacementCalculationResult>( ErrorCode.OperationCancelled );
-    }
-
-    if (phase == MotionPhase.AccelerationWithNegativeJerk)
-    {
-      var duration = param.Profile.CalculateTotalDuration( MotionPhase.ConstantAcceleration );
-      var motionParam = param with { Time = duration };
-      var velocityResult = await _velocityCalculator.Execute( motionParam, cancellationToken );
-
-      if (velocityResult.HasError)
+    return Task.Run( () =>
       {
-        return Result.Error<MotionDisplacementCalculationResult>( velocityResult.ErrorCode );
-      }
+        var positionData = new List<Position>( param.TimeSlices.Count );
 
-      var accelerationResult = await _accelerationCalculator.Execute( motionParam, cancellationToken );
+        var accelerationWithPositiveJerkDisplacement =
+          param.Profile.PositionProfile.CalculateTotalDisplacement( MotionPhase.AccelerationWithPositiveJerk );
 
-      if (accelerationResult.HasError)
-      {
-        return Result.Error<MotionDisplacementCalculationResult>( accelerationResult.ErrorCode );
-      }
+        var constantAccelerationDisplacement =
+          param.Profile.PositionProfile.CalculateTotalDisplacement( MotionPhase.ConstantAcceleration );
 
-      var velocity = velocityResult.Data.Velocity;
-      var acceleration = accelerationResult.Data.Acceleration;
+        var accelerationWithNegativeJerkDisplacement =
+          param.Profile.PositionProfile.CalculateTotalDisplacement( MotionPhase.AccelerationWithNegativeJerk );
 
-      return new MotionDisplacementCalculationResult(
-        totalDisplacement +
-        _kinematics.CalculatePosition( phaseDuration, velocity, acceleration, -param.Profile.Jerk )
-      );
-    }
+        var constantVelocityDisplacement =
+          param.Profile.PositionProfile.CalculateTotalDisplacement( MotionPhase.ConstantVelocity );
 
-    totalDisplacement += jerkDisplacement;
+        var decelerationWithNegativeJerkDisplacement =
+          param.Profile.PositionProfile.CalculateTotalDisplacement( MotionPhase.DecelerationWithNegativeJerk );
 
-    if (cancellationToken.IsCancellationRequested)
-    {
-      return Result.Error<MotionDisplacementCalculationResult>( ErrorCode.OperationCancelled );
-    }
+        var constantDecelerationDisplacement =
+          param.Profile.PositionProfile.CalculateTotalDisplacement( MotionPhase.ConstantDeceleration );
 
-    if (phase == MotionPhase.ConstantVelocity)
-    {
-      return new MotionDisplacementCalculationResult(
-        totalDisplacement + _kinematics.CalculatePosition( phaseDuration, param.Profile.Velocity )
-      );
-    }
+        var accelerationWithPositiveJerkMaxVelocity =
+          param.Profile.VelocityProfile.CalculateVelocity( MotionPhase.AccelerationWithPositiveJerk );
 
-    totalDisplacement += _kinematics.CalculatePosition( param.Profile.SteadyMotionDuration, param.Profile.Velocity );
+        var constantAccelerationMaxVelocity =
+          param.Profile.VelocityProfile.CalculateVelocity( MotionPhase.ConstantAcceleration );
 
-    if (cancellationToken.IsCancellationRequested)
-    {
-      return Result.Error<MotionDisplacementCalculationResult>( ErrorCode.OperationCancelled );
-    }
+        var decelerationWithNegativeJerkMaxVelocity =
+          param.Profile.VelocityProfile.CalculateVelocity( MotionPhase.DecelerationWithNegativeJerk );
 
-    if (phase == MotionPhase.DecelerationWithNegativeJerk)
-    {
-      var duration = param.Profile.CalculateTotalDuration( MotionPhase.ConstantVelocity );
-      var motionParam = param with { Time = duration };
-      var velocityResult = await _velocityCalculator.Execute( motionParam, cancellationToken );
+        var constantDecelerationMaxVelocity =
+          param.Profile.VelocityProfile.CalculateVelocity( MotionPhase.ConstantDeceleration );
 
-      if (velocityResult.HasError)
-      {
-        return Result.Error<MotionDisplacementCalculationResult>( velocityResult.ErrorCode );
-      }
+        foreach (var time in param.TimeSlices)
+        {
+          if (cancellationToken.IsCancellationRequested)
+          {
+            return Result.Error<MotionDisplacementCalculationResult>( ErrorCode.OperationCancelled );
+          }
 
-      var velocity = velocityResult.Data.Velocity;
+          var phase = param.Profile.CalculatePhase( time );
+          var phaseDuration = param.Profile.TimeProfile.CalculateDuration( time, phase );
 
-      return new MotionDisplacementCalculationResult(
-        totalDisplacement + _kinematics.CalculatePosition( phaseDuration, velocity, -param.Profile.Jerk )
-      );
-    }
+          if (phase == MotionPhase.AccelerationWithPositiveJerk)
+          {
+            positionData.Add( _kinematics.CalculateCubicPosition( phaseDuration, param.Profile.Jerk ) );
+            continue;
+          }
 
-    totalDisplacement += jerkDisplacement;
+          if (phase == MotionPhase.ConstantAcceleration)
+          {
+            positionData.Add(
+              accelerationWithPositiveJerkDisplacement
+              + _kinematics.CalculateQuadraticPosition(
+                phaseDuration,
+                accelerationWithPositiveJerkMaxVelocity,
+                param.Profile.MaxAcceleration
+              )
+            );
 
-    if (cancellationToken.IsCancellationRequested)
-    {
-      return Result.Error<MotionDisplacementCalculationResult>( ErrorCode.OperationCancelled );
-    }
+            continue;
+          }
 
-    if (phase == MotionPhase.ConstantDeceleration)
-    {
-      var duration = param.Profile.CalculateTotalDuration( MotionPhase.DecelerationWithNegativeJerk );
-      var velocityParam = param with { Time = duration };
-      var velocityResult = await _velocityCalculator.Execute( velocityParam, cancellationToken );
+          if (phase == MotionPhase.AccelerationWithNegativeJerk)
+          {
+            var x = +_kinematics.CalculateCubicPosition(
+              phaseDuration,
+              constantAccelerationMaxVelocity,
+              param.Profile.MaxAcceleration,
+              -param.Profile.Jerk
+            );
 
-      if (velocityResult.HasError)
-      {
-        return Result.Error<MotionDisplacementCalculationResult>( velocityResult.ErrorCode );
-      }
+            positionData.Add(
+              constantAccelerationDisplacement
+              + _kinematics.CalculateCubicPosition(
+                phaseDuration,
+                constantAccelerationMaxVelocity,
+                param.Profile.MaxAcceleration,
+                -param.Profile.Jerk
+              )
+            );
 
-      var velocity = velocityResult.Data.Velocity;
+            continue;
+          }
 
-      return new MotionDisplacementCalculationResult(
-        totalDisplacement + _kinematics.CalculatePosition( phaseDuration, velocity, -param.Profile.Acceleration )
-      );
-    }
+          if (phase == MotionPhase.ConstantVelocity)
+          {
+            positionData.Add(
+              accelerationWithNegativeJerkDisplacement
+              + _kinematics.CalculateLinearPosition( phaseDuration, param.Profile.MaxVelocity )
+            );
 
-    totalDisplacement += accelerationDisplacement;
+            continue;
+          }
 
-    if (cancellationToken.IsCancellationRequested)
-    {
-      return Result.Error<MotionDisplacementCalculationResult>( ErrorCode.OperationCancelled );
-    }
+          if (phase == MotionPhase.DecelerationWithNegativeJerk)
+          {
+            positionData.Add(
+              constantVelocityDisplacement
+              + _kinematics.CalculateCubicPosition(
+                phaseDuration,
+                param.Profile.MaxVelocity,
+                -param.Profile.Jerk
+              )
+            );
 
-    var totalDuration = param.Profile.CalculateTotalDuration( MotionPhase.ConstantDeceleration );
-    var motionCalculationParam = param with { Time = totalDuration };
-    var initialVelocityResult = await _velocityCalculator.Execute( motionCalculationParam, cancellationToken );
+            continue;
+          }
 
-    if (initialVelocityResult.HasError)
-    {
-      return Result.Error<MotionDisplacementCalculationResult>( initialVelocityResult.ErrorCode );
-    }
+          if (phase == MotionPhase.ConstantDeceleration)
+          {
+            positionData.Add(
+              decelerationWithNegativeJerkDisplacement
+              + _kinematics.CalculateQuadraticPosition(
+                phaseDuration,
+                decelerationWithNegativeJerkMaxVelocity,
+                -param.Profile.MaxAcceleration
+              )
+            );
 
-    var initialAccelerationResult = await _accelerationCalculator.Execute( motionCalculationParam, cancellationToken );
+            continue;
+          }
 
-    if (initialAccelerationResult.HasError)
-    {
-      return Result.Error<MotionDisplacementCalculationResult>( initialAccelerationResult.ErrorCode );
-    }
+          positionData.Add(
+            constantDecelerationDisplacement
+            + _kinematics.CalculateCubicPosition(
+              phaseDuration,
+              constantDecelerationMaxVelocity,
+              -param.Profile.MaxAcceleration,
+              param.Profile.Jerk
+            )
+          );
+        }
 
-    var initialVelocity = initialVelocityResult.Data.Velocity;
-    var initialAcceleration = initialAccelerationResult.Data.Acceleration;
-
-    return new MotionDisplacementCalculationResult(
-      totalDisplacement +
-      _kinematics.CalculatePosition( phaseDuration, initialVelocity, initialAcceleration, param.Profile.Jerk )
+        var result = new MotionDisplacementCalculationResult( positionData );
+        return Result.Success( result );
+      },
+      CancellationToken.None
     );
   }
 }

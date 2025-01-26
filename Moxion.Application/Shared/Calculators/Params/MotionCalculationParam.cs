@@ -5,6 +5,6 @@ using Moxion.Domain.Kinematic;
 namespace Moxion.Application.Shared.Calculators.Params;
 
 public readonly record struct MotionCalculationParam(
-  Time Time,
+  IReadOnlyList<Time> TimeSlices,
   MotionProfile Profile
 ) : ICalculationParam;

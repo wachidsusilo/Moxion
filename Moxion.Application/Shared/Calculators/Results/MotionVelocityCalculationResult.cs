@@ -3,4 +3,5 @@ using Moxion.Common.Values.Derived;
 
 namespace Moxion.Application.Shared.Calculators.Results;
 
-internal readonly record struct MotionVelocityCalculationResult( Velocity Velocity ) : ICalculationResult;
+internal readonly record struct MotionVelocityCalculationResult( IReadOnlyList<Velocity> Velocity )
+  : ICalculationResult;

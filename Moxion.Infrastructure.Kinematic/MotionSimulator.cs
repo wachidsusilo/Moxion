@@ -10,7 +10,6 @@ using Moxion.Application.Shared.Simulators.Results;
 using Moxion.Common;
 using Moxion.Common.Enumerations;
 using Moxion.Common.Values;
-using Moxion.Common.Values.Derived;
 using Moxion.Domain.Kinematic;
 using Moxion.Extensions;
 using Moxion.Infrastructure.Kinematic.Extensions;
@@ -23,8 +22,6 @@ internal class MotionSimulator : IMotionSimulator
   private readonly IMotionDisplacementCalculator _displacementCalculator;
   private readonly IMotionVelocityCalculator _velocityCalculator;
   private readonly IMotionAccelerationCalculator _accelerationCalculator;
-  private readonly IMotionJerkCalculator _jerkCalculator;
-  private readonly IMotionPhaseCalculator _phaseCalculator;
   private readonly ILogger<MotionSimulator> _logger;
 
   public MotionSimulator(
@@ -32,8 +29,6 @@ internal class MotionSimulator : IMotionSimulator
     IMotionDisplacementCalculator displacementCalculator,
     IMotionVelocityCalculator velocityCalculator,
     IMotionAccelerationCalculator accelerationCalculator,
-    IMotionJerkCalculator jerkCalculator,
-    IMotionPhaseCalculator phaseCalculator,
     ILogger<MotionSimulator> logger
   )
   {
@@ -41,8 +36,6 @@ internal class MotionSimulator : IMotionSimulator
     _displacementCalculator = displacementCalculator;
     _velocityCalculator = velocityCalculator;
     _accelerationCalculator = accelerationCalculator;
-    _jerkCalculator = jerkCalculator;
-    _phaseCalculator = phaseCalculator;
     _logger = logger;
   }
 
@@ -55,7 +48,7 @@ internal class MotionSimulator : IMotionSimulator
 
     var result = await ExecuteInternal( param, cancellationToken );
 
-    _logger.LogEnd( result, result.Data.MotionData.Length );
+    _logger.LogEnd( result, result.Data.MotionData?.Count );
 
     return result;
   }
@@ -91,71 +84,72 @@ internal class MotionSimulator : IMotionSimulator
 
     var profile = profileResult.Data.MotionProfile;
     var totalDuration = profile.GetTotalDuration();
+    var timeSlices = new Time[param.DataCount];
     var motionData = new MotionData[param.DataCount];
-    var errorCode = ErrorCode.NoError;
 
-    await Parallel.ForAsync( 0, param.DataCount, cancellationToken, async ( i, cancelToken ) =>
-      {
-        if (errorCode != ErrorCode.NoError || cancellationToken.IsCancellationRequested)
-        {
-          return;
-        }
+    for (var i = 0; i < timeSlices.Length; i++)
+    {
+      timeSlices[i] = totalDuration * i / ( param.DataCount - 1.0 );
+    }
 
-        var time = totalDuration * i / ( param.DataCount - 1.0 );
+    var motionParam = new MotionCalculationParam( timeSlices, profile );
+    var positionTask = _displacementCalculator.Execute( motionParam, cancellationToken );
+    var velocityTask = _velocityCalculator.Execute( motionParam, cancellationToken );
+    var accelerationTask = _accelerationCalculator.Execute( motionParam, cancellationToken );
 
-        var motionParam = new MotionCalculationParam( time, profile );
-        var phaseResult = await _phaseCalculator.Execute( motionParam, cancelToken );
+    var positionResult = await positionTask;
+    var velocityResult = await velocityTask;
+    var accelerationResult = await accelerationTask;
 
-        if (phaseResult.HasError)
-        {
-          errorCode = phaseResult.ErrorCode;
-          return;
-        }
+    if (positionResult.HasError)
+    {
+      return Result.Error<MotionSimulationResult>( positionResult.ErrorCode );
+    }
 
-        var positionResult = await _displacementCalculator.Execute( motionParam, cancelToken );
+    if (velocityResult.HasError)
+    {
+      return Result.Error<MotionSimulationResult>( velocityResult.ErrorCode );
+    }
 
-        if (positionResult.HasError)
-        {
-          errorCode = positionResult.ErrorCode;
-          return;
-        }
+    if (accelerationResult.HasError)
+    {
+      return Result.Error<MotionSimulationResult>( accelerationResult.ErrorCode );
+    }
 
-        var velocityResult = await _velocityCalculator.Execute( motionParam, cancelToken );
+    var positionList = positionResult.Data.Displacement;
+    var velocityList = velocityResult.Data.Velocity;
+    var accelerationList = accelerationResult.Data.Acceleration;
 
-        if (velocityResult.HasError)
-        {
-          errorCode = velocityResult.ErrorCode;
-          return;
-        }
+    if (positionList.Count != motionData.Length)
+    {
+      return Result.Error<MotionSimulationResult>( ErrorCode.DataLengthMismatch );
+    }
 
-        var accelerationResult = await _accelerationCalculator.Execute( motionParam, cancelToken );
+    if (velocityList.Count != motionData.Length)
+    {
+      return Result.Error<MotionSimulationResult>( ErrorCode.DataLengthMismatch );
+    }
 
-        if (accelerationResult.HasError)
-        {
-          errorCode = accelerationResult.ErrorCode;
-          return;
-        }
+    if (accelerationList.Count != motionData.Length)
+    {
+      return Result.Error<MotionSimulationResult>( ErrorCode.DataLengthMismatch );
+    }
 
-        var jerkResult = await _jerkCalculator.Execute( motionParam, cancelToken );
+    for (var i = 0; i < motionData.Length; i++)
+    {
+      var phase = profile.CalculatePhase( timeSlices[i] );
 
-        if (jerkResult.HasError)
-        {
-          errorCode = jerkResult.ErrorCode;
-          return;
-        }
-
-        var phase = phaseResult.Data.MotionPhase;
-        var position = positionResult.Data.Displacement;
-        var velocity = velocityResult.Data.Velocity;
-        var acceleration = accelerationResult.Data.Acceleration;
-        var jerk = jerkResult.Data.Jerk;
-
-        motionData[i] = new MotionData( time, position, velocity, acceleration, jerk, phase );
-        // motionData[i] = new MotionData( time, Position.Zero, velocity, Acceleration.Zero, Jerk.Zero, phase );
-      }
-    );
+      motionData[i] = new MotionData(
+        timeSlices[i],
+        positionList[i],
+        velocityList[i],
+        accelerationList[i],
+        profile.CalculateJerk( phase ),
+        phase
+      );
+    }
 
     var result = new MotionSimulationResult( profile, motionData );
-    return Result.Create( errorCode, result );
+    return Result.Success( result );
   }
 }

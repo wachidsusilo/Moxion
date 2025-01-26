@@ -7,6 +7,7 @@ public enum ErrorCode
   NoError,
   UnknownError,
   UnexpectedNullData,
+  DataLengthMismatch,
   OperationCancelled,
 
   #endregion

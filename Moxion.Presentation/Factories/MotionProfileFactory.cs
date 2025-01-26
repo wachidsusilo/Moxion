@@ -15,14 +15,26 @@ namespace Moxion.Presentation.Factories;
 internal class MotionProfileFactory : IMotionProfileFactory
 {
   private readonly IUnitConverter _unitConverter;
+  private readonly ITimeProfileFactory _timeProfileFactory;
+  private readonly IPositionProfileFactory _positionProfileFactory;
+  private readonly IVelocityProfileFactory _velocityProfileFactory;
+  private readonly IAccelerationProfileFactory _accelerationProfileFactory;
   private readonly ILogger<MotionProfileFactory> _logger;
 
   public MotionProfileFactory(
     IUnitConverter unitConverter,
+    ITimeProfileFactory timeProfileFactory,
+    IPositionProfileFactory positionProfileFactory,
+    IVelocityProfileFactory velocityProfileFactory,
+    IAccelerationProfileFactory accelerationProfileFactory,
     ILogger<MotionProfileFactory> logger
   )
   {
     _unitConverter = unitConverter;
+    _timeProfileFactory = timeProfileFactory;
+    _positionProfileFactory = positionProfileFactory;
+    _velocityProfileFactory = velocityProfileFactory;
+    _accelerationProfileFactory = accelerationProfileFactory;
     _logger = logger;
   }
 
@@ -59,7 +71,7 @@ internal class MotionProfileFactory : IMotionProfileFactory
   }
 
   private Task<Result<MotionProfileDto[]>> CreateArrayInternal(
-    IReadOnlyList<MotionProfile> values,
+    IReadOnlyList<MotionProfile> profiles,
     KinematicUnitInfo sourceUnit,
     KinematicUnitInfo destinationUnit,
     CancellationToken cancellationToken
@@ -67,9 +79,9 @@ internal class MotionProfileFactory : IMotionProfileFactory
   {
     return Task.Run( () =>
       {
-        var result = new List<MotionProfileDto>( values.Count );
+        var result = new List<MotionProfileDto>( profiles.Count );
 
-        foreach (var motionProfile in values)
+        foreach (var motionProfile in profiles)
         {
           var createInternalResult =
             CreateInternal( motionProfile, sourceUnit, destinationUnit, cancellationToken ).Result;
@@ -101,9 +113,9 @@ internal class MotionProfileFactory : IMotionProfileFactory
   )
   {
     var displacementResult = await _unitConverter.Convert(
-      profile.Displacement,
-      sourceUnit.Displacement.Unit,
-      destinationUnit.Displacement.Unit
+      profile.TotalDisplacement,
+      sourceUnit.Position.Unit,
+      destinationUnit.Position.Unit
     );
 
     if (displacementResult.HasError)
@@ -117,7 +129,7 @@ internal class MotionProfileFactory : IMotionProfileFactory
     }
 
     var velocityResult = await _unitConverter.Convert(
-      profile.Velocity,
+      profile.MaxVelocity,
       sourceUnit.Velocity.PositionUnit,
       sourceUnit.Velocity.TimeUnit,
       destinationUnit.Velocity.PositionUnit,
@@ -135,7 +147,7 @@ internal class MotionProfileFactory : IMotionProfileFactory
     }
 
     var accelerationResult = await _unitConverter.Convert(
-      profile.Acceleration,
+      profile.MaxAcceleration,
       sourceUnit.Acceleration.PositionUnit,
       sourceUnit.Acceleration.TimeUnit,
       destinationUnit.Acceleration.PositionUnit,
@@ -170,15 +182,16 @@ internal class MotionProfileFactory : IMotionProfileFactory
       return Result.Error<MotionProfileDto>( ErrorCode.OperationCancelled, default );
     }
 
-    var jerkDurationResult = await _unitConverter.Convert(
-      profile.JerkDuration,
-      sourceUnit.Duration.Unit,
-      destinationUnit.Duration.Unit
+    var timeProfileResult = await _timeProfileFactory.Create(
+      profile.TimeProfile,
+      sourceUnit.Time,
+      destinationUnit.Time,
+      cancellationToken
     );
 
-    if (jerkDurationResult.HasError)
+    if (timeProfileResult.HasError)
     {
-      return Result.Error<MotionProfileDto>( jerkDurationResult.ErrorCode, default );
+      return Result.Error<MotionProfileDto>( timeProfileResult.ErrorCode, default );
     }
 
     if (cancellationToken.IsCancellationRequested)
@@ -186,15 +199,16 @@ internal class MotionProfileFactory : IMotionProfileFactory
       return Result.Error<MotionProfileDto>( ErrorCode.OperationCancelled, default );
     }
 
-    var accelerationDurationResult = await _unitConverter.Convert(
-      profile.AccelerationDuration,
-      sourceUnit.Duration.Unit,
-      destinationUnit.Duration.Unit
+    var positionProfileResult = await _positionProfileFactory.Create(
+      profile.PositionProfile,
+      sourceUnit.Position,
+      destinationUnit.Position,
+      cancellationToken
     );
 
-    if (accelerationDurationResult.HasError)
+    if (positionProfileResult.HasError)
     {
-      return Result.Error<MotionProfileDto>( accelerationDurationResult.ErrorCode, default );
+      return Result.Error<MotionProfileDto>( positionProfileResult.ErrorCode, default );
     }
 
     if (cancellationToken.IsCancellationRequested)
@@ -202,15 +216,16 @@ internal class MotionProfileFactory : IMotionProfileFactory
       return Result.Error<MotionProfileDto>( ErrorCode.OperationCancelled, default );
     }
 
-    var steadyMotionDurationResult = await _unitConverter.Convert(
-      profile.SteadyMotionDuration,
-      sourceUnit.Duration.Unit,
-      destinationUnit.Duration.Unit
+    var velocityProfileResult = await _velocityProfileFactory.Create(
+      profile.VelocityProfile,
+      sourceUnit.Velocity,
+      destinationUnit.Velocity,
+      cancellationToken
     );
 
-    if (steadyMotionDurationResult.HasError)
+    if (velocityProfileResult.HasError)
     {
-      return Result.Error<MotionProfileDto>( steadyMotionDurationResult.ErrorCode, default );
+      return Result.Error<MotionProfileDto>( velocityProfileResult.ErrorCode, default );
     }
 
     if (cancellationToken.IsCancellationRequested)
@@ -218,15 +233,16 @@ internal class MotionProfileFactory : IMotionProfileFactory
       return Result.Error<MotionProfileDto>( ErrorCode.OperationCancelled, default );
     }
 
-    var totalDurationResult = await _unitConverter.Convert(
-      profile.GetTotalDuration(),
-      sourceUnit.Duration.Unit,
-      destinationUnit.Duration.Unit
+    var accelerationProfileResult = await _accelerationProfileFactory.Create(
+      profile.AccelerationProfile,
+      sourceUnit.Acceleration,
+      destinationUnit.Acceleration,
+      cancellationToken
     );
 
-    if (totalDurationResult.HasError)
+    if (accelerationProfileResult.HasError)
     {
-      return Result.Error<MotionProfileDto>( totalDurationResult.ErrorCode, default );
+      return Result.Error<MotionProfileDto>( accelerationProfileResult.ErrorCode, default );
     }
 
     if (cancellationToken.IsCancellationRequested)
@@ -235,7 +251,7 @@ internal class MotionProfileFactory : IMotionProfileFactory
     }
 
     var motionProfileType = profile.GetProfileType();
-    var displacementDto = new PositionDto( displacementResult.Data.ToDouble(), destinationUnit.Displacement.Unit );
+    var displacementDto = new PositionDto( displacementResult.Data.ToDouble(), destinationUnit.Position.Unit );
 
     var velocityDto = new VelocityDto(
       velocityResult.Data.ToDouble(),
@@ -255,30 +271,16 @@ internal class MotionProfileFactory : IMotionProfileFactory
       destinationUnit.Jerk.TimeUnit
     );
 
-    var jerkDurationDto = new TimeDto( jerkDurationResult.Data.ToDouble(), destinationUnit.Duration.Unit );
-
-    var accelerationDurationDto = new TimeDto(
-      accelerationDurationResult.Data.ToDouble(),
-      destinationUnit.Duration.Unit
-    );
-
-    var steadyMotionDurationDto = new TimeDto(
-      steadyMotionDurationResult.Data.ToDouble(),
-      destinationUnit.Duration.Unit
-    );
-
-    var totalDurationDto = new TimeDto( totalDurationResult.Data.ToDouble(), destinationUnit.Duration.Unit );
-
     var result = new MotionProfileDto(
       motionProfileType,
       displacementDto,
       velocityDto,
       accelerationDto,
       jerkDto,
-      jerkDurationDto,
-      accelerationDurationDto,
-      steadyMotionDurationDto,
-      totalDurationDto
+      timeProfileResult.Data,
+      positionProfileResult.Data,
+      velocityProfileResult.Data,
+      accelerationProfileResult.Data
     );
 
     return Result.Success( result );

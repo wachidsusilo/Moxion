@@ -18,8 +18,6 @@ public static class ServiceExtensions
       .AddTransient<IMotionDisplacementCalculator, MotionDisplacementCalculator>()
       .AddTransient<IMotionVelocityCalculator, MotionVelocityCalculator>()
       .AddTransient<IMotionAccelerationCalculator, MotionAccelerationCalculator>()
-      .AddTransient<IMotionJerkCalculator, MotionJerkCalculator>()
-      .AddTransient<IMotionPhaseCalculator, MotionPhaseCalculator>()
       .AddTransient<IMotionSimulator, MotionSimulator>();
   }
 }

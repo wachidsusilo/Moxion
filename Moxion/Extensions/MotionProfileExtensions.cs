@@ -8,14 +8,14 @@ public static class MotionProfileExtensions
 {
   public static Time GetTotalDuration( this MotionProfile profile )
   {
-    return 4 * profile.JerkDuration + 2 * profile.AccelerationDuration + profile.SteadyMotionDuration;
+    return profile.TimeProfile.GetTotalDuration();
   }
 
   public static MotionProfileType GetProfileType( this MotionProfile profile )
   {
-    var hasJerk = !profile.JerkDuration.IsZero;
-    var hasAcceleration = !profile.AccelerationDuration.IsZero;
-    var hasSteadyMotion = !profile.SteadyMotionDuration.IsZero;
+    var hasJerk = !profile.TimeProfile.JerkDuration.IsZero;
+    var hasAcceleration = !profile.TimeProfile.ConstantAccelerationDuration.IsZero;
+    var hasSteadyMotion = !profile.TimeProfile.ConstantVelocityDuration.IsZero;
 
     if (hasSteadyMotion && !hasAcceleration && !hasJerk)
     {
@@ -24,7 +24,7 @@ public static class MotionProfileExtensions
 
     if (hasSteadyMotion && hasAcceleration && !hasJerk)
     {
-      return MotionProfileType.Trapezoid;
+      return MotionProfileType.Trapezoidal;
     }
 
     if (!hasSteadyMotion && hasAcceleration && !hasJerk)
@@ -34,12 +34,12 @@ public static class MotionProfileExtensions
 
     if (!hasSteadyMotion && !hasAcceleration && hasJerk)
     {
-      return MotionProfileType.JerkOnly;
+      return MotionProfileType.JerkDriven;
     }
 
     if (hasSteadyMotion && !hasAcceleration && hasJerk)
     {
-      return MotionProfileType.JerkWithSteadyState;
+      return MotionProfileType.JerkWithConstantVelocity;
     }
 
     if (hasSteadyMotion && hasAcceleration && hasJerk)
@@ -49,8 +49,7 @@ public static class MotionProfileExtensions
 
     if (!hasSteadyMotion && hasAcceleration && hasJerk)
     {
-      // This is not possible
-      // A cubic motion without steady motion phase will not have acceleration phase
+      return MotionProfileType.JerkWithConstantAcceleration;
     }
 
     return MotionProfileType.None;

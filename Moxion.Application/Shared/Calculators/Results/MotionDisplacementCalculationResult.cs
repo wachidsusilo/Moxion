@@ -3,4 +3,5 @@ using Moxion.Common.Values;
 
 namespace Moxion.Application.Shared.Calculators.Results;
 
-internal readonly record struct MotionDisplacementCalculationResult( Position Displacement ) : ICalculationResult;
+internal readonly record struct MotionDisplacementCalculationResult( IReadOnlyList<Position> Displacement )
+  : ICalculationResult;
