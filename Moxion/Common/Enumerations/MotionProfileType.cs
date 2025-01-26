@@ -4,9 +4,10 @@ public enum MotionProfileType
 {
   None,
   Linear,
-  Trapezoid,
+  Trapezoidal,
   Triangular,
-  JerkOnly,
-  JerkWithSteadyState,
+  JerkDriven,
+  JerkWithConstantVelocity,
+  JerkWithConstantAcceleration,
   SCurve
 }
