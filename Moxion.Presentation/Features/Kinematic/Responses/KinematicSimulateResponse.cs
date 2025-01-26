@@ -1,6 +1,5 @@
 ﻿using Moxion.Common.Enumerations;
 using Moxion.Domain.Units;
-using Moxion.Presentation.Abstractions;
 using Moxion.Presentation.Abstractions.Transport;
 using Moxion.Presentation.Dto.Kinematic;
 
