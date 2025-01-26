@@ -5,5 +5,5 @@ namespace Moxion.Application.Shared.Simulators.Results;
 
 internal readonly record struct MotionSimulationResult(
   MotionProfile Profile,
-  MotionData[] MotionData
+  IReadOnlyList<MotionData>? MotionData
 ) : ISimulationResult;

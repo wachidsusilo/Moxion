@@ -38,6 +38,6 @@ internal class SimulateMotionQueryHandler : IQueryHandler<SimulateMotionQuery, S
 
     _logger.LogEnd( result );
 
-    return new SimulateMotionQueryResult( result.ErrorCode, result.Data.Profile, result.Data.MotionData );
+    return new SimulateMotionQueryResult( result.ErrorCode, result.Data.Profile, result.Data.MotionData?.ToArray() );
   }
 }
