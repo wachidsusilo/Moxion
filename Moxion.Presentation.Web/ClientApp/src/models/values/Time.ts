@@ -13,6 +13,14 @@ class Time {
     getUnitInfo() {
         return new TimeUnitInfo(this.unit)
     }
+
+    static from(other: Time) {
+        if (!other) {
+            return new Time()
+        }
+
+        return new Time(other.value, other.unit)
+    }
 }
 
 export default Time

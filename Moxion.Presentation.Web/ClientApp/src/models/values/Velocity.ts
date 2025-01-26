@@ -16,6 +16,14 @@ class Velocity {
     getUnitInfo() {
         return new VelocityUnitInfo(this.positionUnit, this.timeUnit)
     }
+
+    static from(other: Velocity) {
+        if (!other) {
+            return new Velocity()
+        }
+
+        return new Velocity(other.value, other.positionUnit, other.timeUnit)
+    }
 }
 
 export default Velocity

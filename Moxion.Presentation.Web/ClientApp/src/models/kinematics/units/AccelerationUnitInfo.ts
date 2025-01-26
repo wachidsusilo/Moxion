@@ -14,6 +14,14 @@ class AccelerationUnitInfo {
     toString() {
         return `${UnitFormatter.toPositionDisplayFormat(this.positionUnit)}/${UnitFormatter.toTimeDisplayFormat(this.timeUnit)}²`
     }
+
+    static from(other: AccelerationUnitInfo) {
+        if (!other) {
+            return new AccelerationUnitInfo('None', 'None')
+        }
+
+        return new AccelerationUnitInfo(other.positionUnit, other.timeUnit)
+    }
 }
 
 export default AccelerationUnitInfo

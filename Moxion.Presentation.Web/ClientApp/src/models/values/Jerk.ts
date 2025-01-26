@@ -16,6 +16,14 @@ class Jerk {
     getUnitInfo() {
         return new JerkUnitInfo(this.positionUnit, this.timeUnit)
     }
+
+    static from(other: Jerk) {
+        if (!other) {
+            return new Jerk()
+        }
+
+        return new Jerk(other.value, other.positionUnit, other.timeUnit)
+    }
 }
 
 export default Jerk

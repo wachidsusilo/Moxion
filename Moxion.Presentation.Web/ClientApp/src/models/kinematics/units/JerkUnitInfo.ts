@@ -14,6 +14,14 @@ class JerkUnitInfo {
     toString() {
         return `${UnitFormatter.toPositionDisplayFormat(this.positionUnit)}/${UnitFormatter.toTimeDisplayFormat(this.timeUnit)}³`
     }
+
+    static from(other: JerkUnitInfo) {
+        if (!other) {
+            return new JerkUnitInfo('None', 'None')
+        }
+
+        return new JerkUnitInfo(other.positionUnit, other.timeUnit)
+    }
 }
 
 export default JerkUnitInfo

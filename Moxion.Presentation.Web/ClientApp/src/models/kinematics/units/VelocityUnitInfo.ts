@@ -14,6 +14,14 @@ class VelocityUnitInfo {
     toString() {
         return `${UnitFormatter.toPositionDisplayFormat(this.positionUnit)}/${UnitFormatter.toTimeDisplayFormat(this.timeUnit)}`
     }
+
+    static from(other: VelocityUnitInfo) {
+        if (!other) {
+            return new VelocityUnitInfo('None', 'None')
+        }
+
+        return new VelocityUnitInfo(other.positionUnit, other.timeUnit)
+    }
 }
 
 export default VelocityUnitInfo

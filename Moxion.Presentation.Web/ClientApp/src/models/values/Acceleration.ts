@@ -16,6 +16,14 @@ class Acceleration {
     getUnitInfo() {
         return new AccelerationUnitInfo(this.positionUnit, this.timeUnit)
     }
+
+    static from(other: Acceleration) {
+        if (!other) {
+            return new Acceleration()
+        }
+
+        return new Acceleration(other.value, other.positionUnit, other.timeUnit)
+    }
 }
 
 export default Acceleration

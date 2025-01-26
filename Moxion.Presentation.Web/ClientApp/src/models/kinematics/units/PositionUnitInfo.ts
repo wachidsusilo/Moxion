@@ -11,6 +11,14 @@ class PositionUnitInfo {
     toString() {
         return UnitFormatter.toPositionDisplayFormat(this.unit)
     }
+
+    static from(other: PositionUnitInfo) {
+        if (!other) {
+            return new PositionUnitInfo('None')
+        }
+
+        return new PositionUnitInfo(other.unit)
+    }
 }
 
 export default PositionUnitInfo

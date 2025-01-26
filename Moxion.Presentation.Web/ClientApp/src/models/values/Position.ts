@@ -13,6 +13,14 @@ class Position {
     getUnitInfo() {
         return new PositionUnitInfo(this.unit)
     }
+
+    static from(other: Position) {
+        if (!other) {
+            return new Position()
+        }
+
+        return new Position(other.value, other.unit)
+    }
 }
 
 export default Position
