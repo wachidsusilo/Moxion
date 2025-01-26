@@ -66,6 +66,10 @@ public static class ServiceExtensions
   {
     return services
       .AddSingleton<IMotionDataFactory, MotionDataFactory>()
+      .AddSingleton<ITimeProfileFactory, TimeProfileFactory>()
+      .AddSingleton<IPositionProfileFactory, PositionProfileFactory>()
+      .AddSingleton<IVelocityProfileFactory, VelocityProfileFactory>()
+      .AddSingleton<IAccelerationProfileFactory, AccelerationProfileFactory>()
       .AddSingleton<IMotionProfileFactory, MotionProfileFactory>();
   }
 }
