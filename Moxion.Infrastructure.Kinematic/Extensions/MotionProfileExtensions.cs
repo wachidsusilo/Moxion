@@ -15,6 +15,16 @@ public static class MotionProfileExtensions
       return MotionPhase.None;
     }
 
+    if (time.IsZero)
+    {
+      return profile.GetProfileType() switch
+      {
+        MotionProfileType.Linear => MotionPhase.ConstantVelocity,
+        MotionProfileType.Trapezoidal or MotionProfileType.Triangular => MotionPhase.ConstantAcceleration,
+        _ => MotionPhase.AccelerationWithPositiveJerk
+      };
+    }
+
     if (time <= profile.TimeProfile.CalculateTotalDuration( MotionPhase.AccelerationWithPositiveJerk ))
     {
       return MotionPhase.AccelerationWithPositiveJerk;
