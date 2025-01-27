@@ -102,7 +102,7 @@ internal interface IKinematics
   /// s₂ = ½j₁(t₂)³ + ½j₁(t₂)³
   /// s₂ = j₁(t₂)³
   /// </code>
-  /// The duration of the positive jerk phase the same as the duration of the positive
+  /// The duration of the positive jerk phase is the same as the duration of the negative
   /// jerk. Therefore, the jerk duration is given by:
   /// <code>
   /// t₁ = t₂ = ∛(s₂/j₁)
