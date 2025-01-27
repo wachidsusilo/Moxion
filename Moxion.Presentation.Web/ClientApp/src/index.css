@@ -130,6 +130,7 @@
 
 @layer base {
     * {
+        @apply box-border antialiased scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-400/50;
         background: transparent;
         outline: none;
         box-shadow: none;
@@ -149,15 +150,89 @@
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
     }
+
+    ::-webkit-scrollbar-corner {
+        background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        border-radius: 99px;
+    }
 }
 
 @layer components {
+    .motion-simulation-input-container {
+        @apply flex items-center gap-3;
+    }
 
+    .motion-simulation-input-label {
+        @apply w-[130px] shrink-0;
+    }
+
+    .motion-simulation-input-value {
+        @apply h-[30px] w-[100px] px-2 outline outline-1 outline-green-500;
+    }
+
+    .motion-simulation-result-title {
+        @apply mt-4 mb-1 py-1 text-sm text-nowrap text-orange-300;
+    }
+
+    .motion-simulation-result-label {
+        @apply w-[160px] shrink-0 text-sm text-nowrap;
+    }
+
+    .motion-simulation-result-value {
+        @apply px-2 flex shrink-0 items-center;
+    }
+
+    .motion-simulation-result-value-string {
+        @apply motion-simulation-result-value text-blue-400;
+    }
+
+    .motion-simulation-result-value-number {
+        @apply motion-simulation-result-value text-pink-400;
+    }
+
+    .motion-simulation-result-unit {
+        @apply flex items-center text-sm;
+    }
 }
 
 @layer utilities {
     .shrink-on-click {
         @apply active:scale-95 transition;
+    }
+
+    .hairline-t {
+        @apply shadow-[0px_-1px_0px_0px_rgba(255_255_255_/_0.1)];
+    }
+
+    .hairline-r {
+        @apply shadow-[1px_0px_0px_0px_rgba(255_255_255_/_0.1)];
+    }
+
+    .hairline-b {
+        @apply shadow-[0px_1px_0px_0px_rgba(255_255_255_/_0.1)];
+    }
+
+    .hairline-l {
+        @apply shadow-[-1px_0px_0px_0px_rgba(255_255_255_/_0.1)];
+    }
+
+    .text-error {
+        @apply text-red-400;
+    }
+
+    .text-no-error {
+        @apply text-green-400;
+    }
+
+    .button {
+        @apply flex items-center justify-center shrink-on-click;
+    }
+
+    .progress-25 {
+        @apply w-[25px] h-[25px] border-[3px] border-white/75 border-t-transparent rounded-full animate-spin;
     }
 }
 

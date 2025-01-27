@@ -39,161 +39,218 @@ function MotionSimulationPage() {
         <div className="w-full h-full flex flex-col">
             <Header/>
             <div className="w-full h-full flex">
-                <div className="w-[400px] px-8 flex flex-col shrink-0 gap-4 shadow-[1px_0px_0px_0px_rgba(255_255_255_/_0.1)]">
-                    <div className="mt-8 flex items-center gap-3">
-                        <div className="w-[130px]  shrink-0">Displacement</div>
-                        <input ref={displacementRef}
-                               className="h-[30px] w-[100px] px-2 outline outline-1 outline-green-500" type="number"/>
-                        <div>{param.displacement.getUnitInfo().toString()}</div>
+                <div className="w-[400px] h-[calc(100vh-92px)] flex flex-col shrink-0 hairline-r overflow-hidden">
+                    <div className="h-[330px] px-8 flex flex-col gap-4 overflow-hidden">
+                        <div className="mt-8 motion-simulation-input-container">
+                            <div className="motion-simulation-input-label">Displacement</div>
+                            <input ref={displacementRef} className="motion-simulation-input-value" type="number"/>
+                            <div>{param.displacement.getUnitInfo().toString()}</div>
+                        </div>
+                        <div className="motion-simulation-input-container">
+                            <div className="motion-simulation-input-label">Velocity</div>
+                            <input ref={velocityRef} className="motion-simulation-input-value" type="number"/>
+                            <div>{param.velocity.getUnitInfo().toString()}</div>
+                        </div>
+                        <div className="motion-simulation-input-container">
+                            <div className="motion-simulation-input-label">Acceleration</div>
+                            <input ref={accelerationRef} className="motion-simulation-input-value" type="number"/>
+                            <div>{param.acceleration.getUnitInfo().toString()}</div>
+                        </div>
+                        <div className="motion-simulation-input-container">
+                            <div className="motion-simulation-input-label">Jerk</div>
+                            <input ref={jerkRef} className="motion-simulation-input-value" type="number"/>
+                            <div>{param.jerk.getUnitInfo().toString()}</div>
+                        </div>
+                        <div className="motion-simulation-input-container">
+                            <div className="motion-simulation-input-label">Data Count</div>
+                            <input ref={dataCountRef} className="motion-simulation-input-value" type="number"/>
+                        </div>
+                        <div className="w-full mt-8 flex items-center justify-center">
+                            <button className="w-[200px] h-[35px] button bg-blue-500/50"
+                                    disabled={isLoading}
+                                    onClick={onClick}>
+                                {
+                                    isLoading
+                                        ? <div className="progress-25"/>
+                                        : "Simulate"
+                                }
+                            </button>
+                        </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                        <div className="w-[130px]  shrink-0">Velocity</div>
-                        <input ref={velocityRef} className="h-[30px] w-[100px] px-2 outline outline-1 outline-green-500"
-                               type="number"/>
-                        <div>{param.velocity.getUnitInfo().toString()}</div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <div className="w-[130px]  shrink-0">Acceleration</div>
-                        <input ref={accelerationRef}
-                               className="h-[30px] w-[100px] px-2 outline outline-1 outline-green-500" type="number"/>
-                        <div>{param.acceleration.getUnitInfo().toString()}</div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <div className="w-[130px]  shrink-0">Jerk</div>
-                        <input ref={jerkRef} className="h-[30px] w-[100px] px-2 outline outline-1 outline-green-500"
-                               type="number"/>
-                        <div>{param.jerk.getUnitInfo().toString()}</div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <div className="w-[130px]  shrink-0">Data Count</div>
-                        <input ref={dataCountRef}
-                               className="h-[30px] w-[100px] px-2 outline outline-1 outline-green-500"
-                               type="number"/>
-                    </div>
-                    <div className="w-full mt-8 flex items-center justify-center">
-                        <button className="w-[200px] h-[35px] flex items-center justify-center bg-blue-500/50"
-                                disabled={isLoading}
-                                onClick={onClick}>
-                            Simulate
-                        </button>
-                    </div>
-                    <div className="mt-4 pt-8 flex flex-col gap-2 shadow-[0px_-1px_0px_0px_rgba(255_255_255_/_0.1)]">
-                        <div className="flex">
-                            <div className="w-[160px] text-sm text-nowrap">Error</div>
-                            <div className={`px-2 flex items-center 
-                            ${error === 'NoError' ? "text-green-400" : "text-red-400"}`}>
-                                {error}
+                    <div className="h-8 mx-8 hairline-b"/>
+                    <div className="h-[calc(100%-364px)] overflow-auto">
+                        <div className="py-8 px-8 flex flex-col items-start gap-2">
+                            <div className="motion-simulation-result-title mt-0">
+                                Simulation Result
                             </div>
-                        </div>
-                        <div className="flex overflow-hidden">
-                            <div className="w-[160px] shrink-0 text-sm text-nowrap">Motion Profile</div>
-                            <div className="px-2 flex items-center text-blue-400">{data.profile.profileType}</div>
-                        </div>
-                        <div className="flex">
-                            <div className="w-[160px] text-sm text-nowrap">Total Displacement</div>
-                            <div className="px-2 flex items-center text-pink-400">
-                                {data.profile.totalDisplacement.value.toFixed(2)}
+                            <div className="flex">
+                                <div className="motion-simulation-result-label">Error</div>
+                                <div
+                                    className={`motion-simulation-result-value ${error === 'NoError' ? "text-no-error" : "text-error"}`}>
+                                    {error}
+                                </div>
                             </div>
-                            <div
-                                className="flex items-center text-sm">{data.profile.totalDisplacement.getUnitInfo().toString()}</div>
-                        </div>
-                        <div className="flex">
-                            <div className="w-[160px] text-sm text-nowrap">Max. Velocity</div>
-                            <div className="px-2 flex items-center text-pink-400">
-                                {data.profile.maxVelocity.value.toFixed(2)}
+                            <div className="motion-simulation-result-title">
+                                Motion Profile
                             </div>
-                            <div className="flex items-center text-sm">
-                                {data.profile.maxVelocity.getUnitInfo().toString()}
+                            <div className="flex">
+                                <div className="motion-simulation-result-label">Profile Type</div>
+                                <div className="motion-simulation-result-value-string">{data.profile.profileType}</div>
                             </div>
-                        </div>
-                        <div className="flex">
-                            <div className="w-[160px] text-sm text-nowrap">Max. Acceleration</div>
-                            <div className="px-2 flex items-center text-pink-400">
-                                {data.profile.maxAcceleration.value.toFixed(2)}
+                            <div className="flex">
+                                <div className="motion-simulation-result-label">Total Displacement</div>
+                                <div className="motion-simulation-result-value-number">
+                                    {data.profile.totalDisplacement.value.toFixed(2)}
+                                </div>
+                                <div
+                                    className="motion-simulation-result-unit">{data.profile.totalDisplacement.getUnitInfo().toString()}</div>
                             </div>
-                            <div className="flex items-center text-sm">
-                                {data.profile.maxAcceleration.getUnitInfo().toString()}
+                            <div className="flex">
+                                <div className="motion-simulation-result-label">Max. Velocity</div>
+                                <div className="motion-simulation-result-value-number">
+                                    {data.profile.maxVelocity.value.toFixed(2)}
+                                </div>
+                                <div className="motion-simulation-result-unit">
+                                    {data.profile.maxVelocity.getUnitInfo().toString()}
+                                </div>
                             </div>
-                        </div>
-                        <div className="flex">
-                            <div className="w-[160px] text-sm text-nowrap">Jerk</div>
-                            <div className="px-2 flex items-center text-pink-400">
-                                {data.profile.jerk.value.toFixed(2)}
+                            <div className="flex">
+                                <div className="motion-simulation-result-label">Max. Acceleration</div>
+                                <div className="motion-simulation-result-value-number">
+                                    {data.profile.maxAcceleration.value.toFixed(2)}
+                                </div>
+                                <div className="motion-simulation-result-unit">
+                                    {data.profile.maxAcceleration.getUnitInfo().toString()}
+                                </div>
                             </div>
-                            <div className="flex items-center text-sm">
-                                {data.profile.jerk.getUnitInfo().toString()}
+                            <div className="flex">
+                                <div className="motion-simulation-result-label">Jerk</div>
+                                <div className="motion-simulation-result-value-number">
+                                    {data.profile.jerk.value.toFixed(2)}
+                                </div>
+                                <div className="motion-simulation-result-unit">
+                                    {data.profile.jerk.getUnitInfo().toString()}
+                                </div>
                             </div>
-                        </div>
-                        <div className="flex">
-                            <div className="w-[160px] text-sm text-nowrap">P. Jerk Displacement</div>
-                            <div className="px-2 flex items-center text-pink-400">
-                                {data.profile.positionProfile.positiveJerkDisplacement.value.toFixed(2)}
+                            <div className="motion-simulation-result-title">
+                                Time Profile
                             </div>
-                            <div className="flex items-center text-sm">
-                                {data.profile.positionProfile.positiveJerkDisplacement.getUnitInfo().toString()}
+                            <div className="flex">
+                                <div className="motion-simulation-result-label">Jerk</div>
+                                <div className="motion-simulation-result-value-number">
+                                    {data.profile.timeProfile.jerkDuration.value.toFixed(2)}
+                                </div>
+                                <div className="motion-simulation-result-unit">
+                                    {data.profile.timeProfile.jerkDuration.getUnitInfo().toString()}
+                                </div>
                             </div>
-                        </div>
-                        <div className="flex">
-                            <div className="w-[160px] text-sm text-nowrap">N. Jerk Displacement</div>
-                            <div className="px-2 flex items-center text-pink-400">
-                                {data.profile.positionProfile.negativeJerkDisplacement.value.toFixed(2)}
+                            <div className="flex">
+                                <div className="motion-simulation-result-label">Const. Acceleration</div>
+                                <div className="motion-simulation-result-value-number">
+                                    {data.profile.timeProfile.constantAccelerationDuration.value.toFixed(2)}
+                                </div>
+                                <div className="motion-simulation-result-unit">
+                                    {data.profile.timeProfile.constantAccelerationDuration.getUnitInfo().toString()}
+                                </div>
                             </div>
-                            <div className="flex items-center text-sm">
-                                {data.profile.positionProfile.negativeJerkDisplacement.getUnitInfo().toString()}
+                            <div className="flex">
+                                <div className="motion-simulation-result-label">Const. Velocity</div>
+                                <div className="motion-simulation-result-value-number">
+                                    {data.profile.timeProfile.constantVelocityDuration.value.toFixed(2)}
+                                </div>
+                                <div className="motion-simulation-result-unit">
+                                    {data.profile.timeProfile.constantVelocityDuration.getUnitInfo().toString()}
+                                </div>
                             </div>
-                        </div>
-                        <div className="flex">
-                            <div className="w-[160px] text-sm text-nowrap">C. Acc Displacement</div>
-                            <div className="px-2 flex items-center text-pink-400">
-                                {data.profile.positionProfile.constantAccelerationDisplacement.value.toFixed(2)}
+                            <div className="flex">
+                                <div className="motion-simulation-result-label">Total</div>
+                                <div className="motion-simulation-result-value-number">
+                                    {data.profile.timeProfile.totalDuration.value.toFixed(2)}
+                                </div>
+                                <div className="motion-simulation-result-unit">
+                                    {data.profile.timeProfile.totalDuration.getUnitInfo().toString()}
+                                </div>
                             </div>
-                            <div className="flex items-center text-sm">
-                                {data.profile.positionProfile.constantAccelerationDisplacement.getUnitInfo().toString()}
+                            <div className="motion-simulation-result-title">
+                                Displacement Profile
                             </div>
-                        </div>
-                        <div className="flex">
-                            <div className="w-[160px] text-sm text-nowrap">C. Vel Displacement</div>
-                            <div className="px-2 flex items-center text-pink-400">
-                                {data.profile.positionProfile.constantVelocityDisplacement.value.toFixed(2)}
+                            <div className="flex">
+                                <div className="motion-simulation-result-label">Positive Jerk</div>
+                                <div className="motion-simulation-result-value-number">
+                                    {data.profile.positionProfile.positiveJerkDisplacement.value.toFixed(2)}
+                                </div>
+                                <div className="motion-simulation-result-unit">
+                                    {data.profile.positionProfile.positiveJerkDisplacement.getUnitInfo().toString()}
+                                </div>
                             </div>
-                            <div className="flex items-center text-sm">
-                                {data.profile.positionProfile.constantVelocityDisplacement.getUnitInfo().toString()}
+                            <div className="flex">
+                                <div className="motion-simulation-result-label">Negative Jerk</div>
+                                <div className="motion-simulation-result-value-number">
+                                    {data.profile.positionProfile.negativeJerkDisplacement.value.toFixed(2)}
+                                </div>
+                                <div className="motion-simulation-result-unit">
+                                    {data.profile.positionProfile.negativeJerkDisplacement.getUnitInfo().toString()}
+                                </div>
                             </div>
-                        </div>
-                        <div className="flex">
-                            <div className="w-[160px] text-sm text-nowrap">Jerk Duration</div>
-                            <div className="px-2 flex items-center text-pink-400">
-                                {data.profile.timeProfile.jerkDuration.value.toFixed(2)}
+                            <div className="flex">
+                                <div className="motion-simulation-result-label">Const. Acceleration</div>
+                                <div className="motion-simulation-result-value-number">
+                                    {data.profile.positionProfile.constantAccelerationDisplacement.value.toFixed(2)}
+                                </div>
+                                <div className="motion-simulation-result-unit">
+                                    {data.profile.positionProfile.constantAccelerationDisplacement.getUnitInfo().toString()}
+                                </div>
                             </div>
-                            <div className="flex items-center text-sm">
-                                {data.profile.timeProfile.jerkDuration.getUnitInfo().toString()}
+                            <div className="flex">
+                                <div className="motion-simulation-result-label">Const. Velocity</div>
+                                <div className="motion-simulation-result-value-number">
+                                    {data.profile.positionProfile.constantVelocityDisplacement.value.toFixed(2)}
+                                </div>
+                                <div className="motion-simulation-result-unit">
+                                    {data.profile.positionProfile.constantVelocityDisplacement.getUnitInfo().toString()}
+                                </div>
                             </div>
-                        </div>
-                        <div className="flex">
-                            <div className="w-[160px] text-sm text-nowrap">Const. Acceleration</div>
-                            <div className="px-2 flex items-center text-pink-400">
-                                {data.profile.timeProfile.constantAccelerationDuration.value.toFixed(2)}
+                            <div className="motion-simulation-result-title">
+                                Velocity Profile
                             </div>
-                            <div className="flex items-center text-sm">
-                                {data.profile.timeProfile.constantAccelerationDuration.getUnitInfo().toString()}
+                            <div className="flex">
+                                <div className="motion-simulation-result-label">Positive Jerk</div>
+                                <div className="motion-simulation-result-value-number">
+                                    {data.profile.velocityProfile.positiveJerkMaxVelocity.value.toFixed(2)}
+                                </div>
+                                <div className="motion-simulation-result-unit">
+                                    {data.profile.velocityProfile.positiveJerkMaxVelocity.getUnitInfo().toString()}
+                                </div>
                             </div>
-                        </div>
-                        <div className="flex">
-                            <div className="w-[160px] text-sm text-nowrap">Const. Velocity</div>
-                            <div className="px-2 flex items-center text-pink-400">
-                                {data.profile.timeProfile.constantVelocityDuration.value.toFixed(2)}
+                            <div className="flex">
+                                <div className="motion-simulation-result-label">Const. Acceleration</div>
+                                <div className="motion-simulation-result-value-number">
+                                    {data.profile.velocityProfile.constantAccelerationMaxVelocity.value.toFixed(2)}
+                                </div>
+                                <div className="motion-simulation-result-unit">
+                                    {data.profile.velocityProfile.constantAccelerationMaxVelocity.getUnitInfo().toString()}
+                                </div>
                             </div>
-                            <div className="flex items-center text-sm">
-                                {data.profile.timeProfile.constantVelocityDuration.getUnitInfo().toString()}
+                            <div className="flex">
+                                <div className="motion-simulation-result-label">Negative Jerk</div>
+                                <div className="motion-simulation-result-value-number">
+                                    {data.profile.velocityProfile.negativeJerkMaxVelocity.value.toFixed(2)}
+                                </div>
+                                <div className="motion-simulation-result-unit">
+                                    {data.profile.velocityProfile.negativeJerkMaxVelocity.getUnitInfo().toString()}
+                                </div>
                             </div>
-                        </div>
-                        <div className="flex">
-                            <div className="w-[160px] text-sm text-nowrap">Total Duration</div>
-                            <div className="px-2 flex items-center text-pink-400">
-                                {data.profile.timeProfile.totalDuration.value.toFixed(2)}
+                            <div className="motion-simulation-result-title">
+                                Acceleration Profile
                             </div>
-                            <div className="flex items-center text-sm">
-                                {data.profile.timeProfile.totalDuration.getUnitInfo().toString()}
+                            <div className="flex">
+                                <div className="motion-simulation-result-label">Positive Jerk</div>
+                                <div className="motion-simulation-result-value-number">
+                                    {data.profile.accelerationProfile.positiveJerkMaxAcceleration.value.toFixed(2)}
+                                </div>
+                                <div className="motion-simulation-result-unit">
+                                    {data.profile.accelerationProfile.positiveJerkMaxAcceleration.getUnitInfo().toString()}
+                                </div>
                             </div>
                         </div>
                     </div>
