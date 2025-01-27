@@ -115,13 +115,6 @@ internal class MotionDisplacementCalculator : IMotionDisplacementCalculator
 
           if (phase == MotionPhase.AccelerationWithNegativeJerk)
           {
-            var x = +_kinematics.CalculateCubicPosition(
-              phaseDuration,
-              constantAccelerationMaxVelocity,
-              param.Profile.MaxAcceleration,
-              -param.Profile.Jerk
-            );
-
             positionData.Add(
               constantAccelerationDisplacement
               + _kinematics.CalculateCubicPosition(
