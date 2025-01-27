@@ -39,7 +39,7 @@ function MotionSimulationPage() {
         <div className="w-full h-full flex flex-col">
             <Header/>
             <div className="w-full h-full flex">
-                <div className="w-[400px] px-8 flex flex-col gap-4 shadow-[1px_0px_0px_0px_rgba(255_255_255_/_0.1)]">
+                <div className="w-[400px] px-8 flex flex-col shrink-0 gap-4 shadow-[1px_0px_0px_0px_rgba(255_255_255_/_0.1)]">
                     <div className="mt-8 flex items-center gap-3">
                         <div className="w-[130px]  shrink-0">Displacement</div>
                         <input ref={displacementRef}
