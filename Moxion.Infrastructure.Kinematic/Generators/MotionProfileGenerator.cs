@@ -337,229 +337,254 @@ internal class MotionProfileGenerator : IMotionProfileGenerator
   private Result<MotionProfile> GenerateCubicMotionProfile( MotionProfileGenerationParam param )
   {
     var totalDisplacement = param.Displacement;
-    var maxAcceleration = param.Acceleration;
     var jerk = param.Jerk;
 
-    var jerkDuration = _kinematics.CalculateCubicTime( maxAcceleration, jerk );
+    // Assumes that the motion does not have constant acceleration and constant velocity phases
+    var positiveJerkMaxAcceleration = param.Acceleration;
+    var jerkDuration = _kinematics.CalculateCubicTime( positiveJerkMaxAcceleration, jerk );
+    var constantAccelerationDuration = Time.Zero;
+    var constantVelocityDuration = Time.Zero;
 
     if (jerkDuration.IsNegative)
     {
       return Result.Error<MotionProfile>( ErrorCode.NegativeTimeResult );
     }
 
-    var positiveJerkVelocity = _kinematics.CalculateCubicVelocity( jerkDuration, jerk );
-    var positiveJerkDisplacement = _kinematics.CalculateCubicPosition( jerkDuration, jerk );
-    var negativeJerkDisplacement =
-      _kinematics.CalculateCubicPosition( jerkDuration, positiveJerkVelocity, maxAcceleration, jerk );
+    var positiveJerkMaxVelocity = _kinematics.CalculateCubicVelocity( jerkDuration, jerk );
+    var constantAccelerationMaxVelocity = positiveJerkMaxVelocity;
+    var negativeJerkMaxVelocity = 2 * positiveJerkMaxVelocity;
 
-    var maxVelocity = param.Velocity > 2 * positiveJerkVelocity
-      ? param.Velocity
-      : 2 * positiveJerkVelocity;
-
-    if (totalDisplacement <= 2 * ( positiveJerkDisplacement + negativeJerkDisplacement ))
+    if (negativeJerkMaxVelocity < param.Velocity)
     {
-      // The total displacement is insufficient to perform previously calculated jerk phases.
-      // We need to adjust the parameters accordingly.
-      jerkDuration = _kinematics.CalculateCubicJerkDuration( totalDisplacement, jerk );
+      // If the velocity at the end of negative jerk phase is smaller than the requested velocity,
+      // it means that the motion should have constant acceleration phase.
+      // In this case, we need to recalculate the velocity at the end of constant acceleration phase
+      // and the velocity at the end of negative jerk phase.
+      var constantAccelerationVelocity = param.Velocity - negativeJerkMaxVelocity;
 
-      if (jerkDuration.IsNegative)
-      {
-        return Result.Error<MotionProfile>( ErrorCode.NegativeTimeResult );
-      }
-
-      maxAcceleration = _kinematics.CalculateCubicAcceleration( jerkDuration, jerk );
-      positiveJerkVelocity = _kinematics.CalculateCubicVelocity( jerkDuration, jerk );
-      positiveJerkDisplacement = _kinematics.CalculateCubicPosition( jerkDuration, jerk );
-
-      negativeJerkDisplacement = _kinematics.CalculateCubicPosition(
-        jerkDuration,
-        positiveJerkVelocity,
-        maxAcceleration,
-        -jerk
-      );
-
-      maxVelocity = param.Velocity > 2 * positiveJerkVelocity
-        ? param.Velocity
-        : 2 * positiveJerkVelocity;
-    }
-
-    if (param.Velocity <= maxVelocity)
-    {
-      // The maximum velocity is achieved before the end of negative jerk phase.
-      // We need to adjust the parameters accordingly.
-      jerkDuration = _kinematics.CalculateCubicJerkDuration( param.Velocity, jerk );
-
-      if (jerkDuration.IsNegative)
-      {
-        return Result.Error<MotionProfile>( ErrorCode.NegativeTimeResult );
-      }
-
-      maxAcceleration = _kinematics.CalculateCubicAcceleration( jerkDuration, jerk );
-      positiveJerkVelocity = _kinematics.CalculateCubicVelocity( jerkDuration, jerk );
-      positiveJerkDisplacement = _kinematics.CalculateCubicPosition( jerkDuration, jerk );
-
-      negativeJerkDisplacement = _kinematics.CalculateCubicPosition(
-        jerkDuration,
-        positiveJerkVelocity,
-        maxAcceleration,
-        -jerk
-      );
-
-      maxVelocity = param.Velocity;
-    }
-
-    var constantAccelerationDuration = param.Velocity > maxVelocity
-      ? Time.Zero
-      : _kinematics.CalculateQuadraticTime( maxVelocity - 2 * positiveJerkVelocity, maxAcceleration );
-
-    if (constantAccelerationDuration.IsNegative)
-    {
-      return Result.Error<MotionProfile>( ErrorCode.NegativeTimeResult );
-    }
-
-    var constantAccelerationVelocity = positiveJerkVelocity + _kinematics.CalculateQuadraticVelocity(
-      constantAccelerationDuration,
-      maxAcceleration
-    );
-
-    if (!constantAccelerationDuration.IsZero)
-    {
-      // If the motion has constant acceleration phase,
-      // we need to recalculate the negative jerk displacement.
-      negativeJerkDisplacement = _kinematics.CalculateCubicPosition(
-        jerkDuration,
+      constantAccelerationDuration = _kinematics.CalculateQuadraticTime(
         constantAccelerationVelocity,
-        maxAcceleration,
-        -jerk
+        positiveJerkMaxAcceleration
       );
-    }
-
-    var constantAccelerationDisplacement = _kinematics.CalculateQuadraticPosition(
-      constantAccelerationDuration,
-      positiveJerkVelocity,
-      maxAcceleration
-    );
-
-    var constantVelocityDisplacement = maxVelocity < param.Velocity
-      ? Position.Zero
-      : totalDisplacement
-        - 2 * ( positiveJerkDisplacement + negativeJerkDisplacement )
-        - 2 * constantAccelerationDisplacement;
-
-    if (!constantAccelerationDisplacement.IsZero && constantVelocityDisplacement.IsNegative)
-    {
-      // if the motion has constant acceleration phase but the constant velocity displacement is negative,
-      // it means that the total displacement is sufficient to perform full acceleration phase
-      // but the magnitude of constant acceleration is not large enough to ramp up the velocity
-      // so that the maximum velocity is achieved before half of the total displacement.
-      // In this case, the motion cannot achieve maximum velocity, so we need to adjust
-      // the parameters accordingly.
-      //
-      // NOTE: Calculating constant acceleration duration is a bit tricky since it caused circular
-      //       dependency. The calculation of constant acceleration duration is depended on the negative
-      //       jerk displacement, while the calculation of negative jerk displacement is depended on
-      //       the velocity at the end of constant acceleration phase.
-      //
-      // Currently, we have the following variables:
-      // - s  : the half displacement of the motion
-      // - s₁ : the displacement of positive jerk phase (known)
-      // - s₂ : the displacement of constant acceleration phase (unknown)
-      // - s₃ : the displacement of negative jerk phase (unknown)
-      // - t₁ : the duration of positive jerk phase (known)
-      // - t₂ : the duration of constant acceleration phase (unknown)
-      // - t₃ : the duration of negative jerk phase (known, is equal to t₁)
-      // 
-      // The sum of the displacement of the mentioned phases should be equal to the half displacement
-      // of the motion, we can say that:
-      //   s = s₁ + s₂ + s₃
-      // 
-      // The displacement of constant acceleration phase is given by:
-      //   s₂ = v₁t₂ + ½a₁(t₂)²
-      // where, v₁ is the velocity at the end of positive jerk phase
-      //        a₁ is the acceleration at the end of positive jerk phase (max acceleration)
-      //        t₂ is the duration of constant acceleration phase
-      //
-      // The velocity at the end of constant acceleration phase is given by:
-      //   v₂ = v₁ + a₁t₂
-      // where, v₂ is the velocity at the end of constant acceleration phase 
-      //
-      // The displacement of negative jerk phase is given by:
-      //   s₃ = v₂t₃ + ½a₁(t₃)² - ⅙j(t₃)³
-      //
-      // By substituting v₂ into s₃, we got:
-      //   s₃ = (v₁ + a₁t₂)t₃ + ½a₁(t₃)² - ⅙j(t₃)³
-      //   s₃ = v₁t₃ + a₁t₂t₃ + ½a₁(t₃)² - ⅙j(t₃)³
-      //
-      // Then we can rewrite the equation of the half displacement as of the following:
-      //   s = s₁ + s₂ + s₃
-      //   s = s₁ + (v₁t₂ + ½a₁(t₂)²) + (v₁t₃ + a₁t₂t₃ + ½a₁(t₃)² - ⅙j(t₃)³)
-      //   s = s₁ + v₁t₂ + ½a₁(t₂)² + v₁t₃ + a₁t₂t₃ + ½a₁(t₃)² - ⅙j(t₃)³
-      //
-      // Since all variables except t₂ is known, we got quadratic equation in the function of t₂:
-      //   ½a₁(t₂)² + (v₁ + a₁t₃)t₂ + (s₁ + v₁t₃ + ½a₁(t₃)² - ⅙j(t₃)³ - s) = 0
-      //
-      // The discriminant, d, is given by:
-      //   d = b² - 4ac
-      // where, a = ½a₁
-      //        b = v₁ + a₁t₃
-      //        c = s₁ + v₁t₃ + ½a₁(t₃)² - ⅙j(t₃)³ - s
-      //
-      // The root of the quadratic formula is given by:
-      //   t₂ = (-b ± √d) / 2a
-      //
-      // Because time cannot be negative, we only care about the positive result:
-      //   t₂ = (-b + √d) / 2a
-      //
-      var halfDisplacement = totalDisplacement / 2;
-
-      var a = maxAcceleration / 2;
-      var b = positiveJerkVelocity + maxAcceleration * jerkDuration;
-      var c = positiveJerkDisplacement
-              + positiveJerkVelocity * jerkDuration
-              + maxAcceleration * jerkDuration * jerkDuration / 2
-              - jerk * jerkDuration * jerkDuration * jerkDuration / 6
-              - halfDisplacement;
-
-      var d = ( b * b ) - ( 4 * a * c );
-
-      constantAccelerationDuration = ( -b + d.SquareRoot() ) / ( 2 * a );
 
       if (constantAccelerationDuration.IsNegative)
       {
         return Result.Error<MotionProfile>( ErrorCode.NegativeTimeResult );
       }
 
-      constantAccelerationDisplacement = _kinematics.CalculateQuadraticPosition(
-        constantAccelerationDuration,
-        positiveJerkVelocity,
-        maxAcceleration
-      );
+      constantAccelerationMaxVelocity = positiveJerkMaxVelocity
+                                        + _kinematics.CalculateQuadraticVelocity(
+                                          constantAccelerationDuration,
+                                          positiveJerkMaxAcceleration
+                                        );
 
-      maxVelocity = 2 * positiveJerkVelocity + _kinematics.CalculateQuadraticVelocity(
-        constantAccelerationDuration,
-        maxAcceleration
-      );
+      negativeJerkMaxVelocity = constantAccelerationMaxVelocity + positiveJerkMaxVelocity;
+    }
+    else if (negativeJerkMaxVelocity > param.Velocity)
+    {
+      // On the other hand, if the velocity at the end of negative jerk phase is larger than the requested
+      // velocity, it means that the motion with the given parameters cannot achieve maximum acceleration.
+      // In this case, we need to recalculate the velocity contributed by the positive and negative jerk phases.
+      positiveJerkMaxVelocity = param.Velocity / 2;
+      constantAccelerationMaxVelocity = positiveJerkMaxVelocity;
+      negativeJerkMaxVelocity = 2 * positiveJerkMaxVelocity;
 
-      constantAccelerationVelocity = positiveJerkVelocity + _kinematics.CalculateQuadraticVelocity(
-        constantAccelerationDuration,
-        maxAcceleration
-      );
+      jerkDuration = _kinematics.CalculateCubicTime( positiveJerkMaxVelocity, jerk );
 
+      if (jerkDuration.IsNegative)
+      {
+        return Result.Error<MotionProfile>( ErrorCode.NegativeTimeResult );
+      }
+
+      positiveJerkMaxAcceleration = _kinematics.CalculateCubicAcceleration( jerkDuration, jerk );
+    }
+
+    var positiveJerkDisplacement = _kinematics.CalculateCubicPosition( jerkDuration, jerk );
+    var constantAccelerationDisplacement = _kinematics.CalculateQuadraticPosition(
+      constantAccelerationDuration,
+      positiveJerkMaxVelocity,
+      positiveJerkMaxAcceleration
+    );
+
+    var constantVelocityDisplacement = Position.Zero;
+    var negativeJerkDisplacement = _kinematics.CalculateCubicPosition(
+      jerkDuration,
+      constantAccelerationMaxVelocity,
+      positiveJerkMaxAcceleration,
+      -jerk
+    );
+
+    var calculatedTotalDisplacement = constantVelocityDisplacement
+                                      + 2 * ( positiveJerkDisplacement + negativeJerkDisplacement )
+                                      + 2 * constantAccelerationDisplacement;
+
+    if (totalDisplacement < calculatedTotalDisplacement)
+    {
+      // If the requested total displacement is smaller than the calculated total displacement,
+      // it means that the motion with the given parameters cannot achieve maximum velocity.
+      // In this case, we need to collapse the constant velocity phase and squeeze down
+      // the acceleration and deceleration phases.
+
+      // First, try stripping the constant acceleration phase off
+      constantAccelerationMaxVelocity = positiveJerkMaxVelocity;
+      negativeJerkMaxVelocity = 2 * positiveJerkMaxVelocity;
+
+      constantAccelerationDuration = Time.Zero;
+      constantAccelerationDisplacement = Position.Zero;
       negativeJerkDisplacement = _kinematics.CalculateCubicPosition(
         jerkDuration,
-        constantAccelerationVelocity,
-        maxAcceleration,
+        constantAccelerationMaxVelocity,
+        positiveJerkMaxAcceleration,
         -jerk
       );
 
-      constantVelocityDisplacement = Position.Zero;
+      calculatedTotalDisplacement = constantVelocityDisplacement
+                                    + 2 * ( positiveJerkDisplacement + negativeJerkDisplacement );
+
+      if (totalDisplacement < calculatedTotalDisplacement)
+      {
+        // If removing constant acceleration phase is still insufficient,
+        // we need to squeeze down the positive and negative jerk phases.
+        jerkDuration = _kinematics.CalculateCubicJerkDuration( totalDisplacement, jerk );
+
+        if (jerkDuration.IsNegative)
+        {
+          return Result.Error<MotionProfile>( ErrorCode.NegativeTimeResult );
+        }
+
+        positiveJerkMaxAcceleration = _kinematics.CalculateCubicAcceleration( jerkDuration, jerk );
+
+        positiveJerkMaxVelocity = _kinematics.CalculateCubicVelocity( jerkDuration, jerk );
+        constantAccelerationMaxVelocity = positiveJerkMaxVelocity;
+        negativeJerkMaxVelocity = 2 * positiveJerkMaxVelocity;
+
+        positiveJerkDisplacement = _kinematics.CalculateCubicPosition( jerkDuration, jerk );
+        negativeJerkDisplacement = _kinematics.CalculateCubicPosition(
+          jerkDuration,
+          constantAccelerationMaxVelocity,
+          positiveJerkMaxAcceleration,
+          -jerk
+        );
+      }
+      else if (totalDisplacement > calculatedTotalDisplacement)
+      {
+        // If removing constant acceleration phase is resulted in a leftover of the displacement,
+        // it means that the motion should have acceleration phase but with reduced duration.
+        //
+        // NOTE: Calculating constant acceleration duration is a bit tricky since it caused circular
+        //       dependency. The calculation of constant acceleration duration is depended on the negative
+        //       jerk displacement, while the calculation of negative jerk displacement is depended on
+        //       the velocity at the end of constant acceleration phase.
+        //
+        // Currently, we have the following variables:
+        // - sₕ  : the half displacement of the motion
+        // - s₁ : the displacement of positive jerk phase (known)
+        // - s₂ : the displacement of constant acceleration phase (unknown)
+        // - s₃ : the displacement of negative jerk phase (unknown)
+        // - t₁ : the duration of positive jerk phase (known)
+        // - t₂ : the duration of constant acceleration phase (unknown)
+        // - t₃ : the duration of negative jerk phase (known, is equal to t₁)
+        // 
+        // The sum of the displacement of the mentioned phases should be equal to the half displacement
+        // of the motion, we can say that:
+        //   sₕ = s₁ + s₂ + s₃
+        // 
+        // The displacement of constant acceleration phase is given by:
+        //   s₂ = v₁t₂ + ½a₁(t₂)²
+        // where, v₁ is the velocity at the end of positive jerk phase
+        //        a₁ is the acceleration at the end of positive jerk phase (max acceleration)
+        //        t₂ is the duration of constant acceleration phase
+        //
+        // The velocity at the end of constant acceleration phase is given by:
+        //   v₂ = v₁ + a₁t₂
+        // where, v₂ is the velocity at the end of constant acceleration phase 
+        //
+        // The displacement of negative jerk phase is given by:
+        //   s₃ = v₂t₃ + ½a₁(t₃)² - ⅙j(t₃)³
+        //
+        // By substituting v₂ into s₃, we got:
+        //   s₃ = (v₁ + a₁t₂)t₃ + ½a₁(t₃)² - ⅙j(t₃)³
+        //   s₃ = v₁t₃ + a₁t₂t₃ + ½a₁(t₃)² - ⅙j(t₃)³
+        //
+        // Then we can rewrite the equation of the half displacement as of the following:
+        //   sₕ = s₁ + s₂ + s₃
+        //   sₕ = s₁ + (v₁t₂ + ½a₁(t₂)²) + (v₁t₃ + a₁t₂t₃ + ½a₁(t₃)² - ⅙j(t₃)³)
+        //   sₕ = s₁ + v₁t₂ + ½a₁(t₂)² + v₁t₃ + a₁t₂t₃ + ½a₁(t₃)² - ⅙j(t₃)³
+        //
+        // Since all variables except t₂ is known, we got quadratic equation in the function of t₂:
+        //   ½a₁(t₂)² + (v₁ + a₁t₃)t₂ + (s₁ + v₁t₃ + ½a₁(t₃)² - ⅙j(t₃)³ - sₕ) = 0
+        //
+        // The discriminant, d, is given by:
+        //   d = b² - 4ac
+        // where, a = ½a₁
+        //        b = v₁ + a₁t₃
+        //        c = s₁ + v₁t₃ + ½a₁(t₃)² - ⅙j(t₃)³ - sₕ
+        //
+        // The root of the quadratic formula is given by:
+        //   t₂ = (-b ± √d) / 2a
+        //
+        // Because time cannot be negative, we only care about the positive result:
+        //   t₂ = (-b + √d) / 2a
+        //
+        var halfDisplacement = totalDisplacement / 2;
+
+        var a = positiveJerkMaxAcceleration / 2;
+        var b = positiveJerkMaxVelocity + positiveJerkMaxAcceleration * jerkDuration;
+        var c = positiveJerkDisplacement
+                + positiveJerkMaxVelocity * jerkDuration
+                + positiveJerkMaxAcceleration * jerkDuration * jerkDuration / 2
+                - jerk * jerkDuration * jerkDuration * jerkDuration / 6
+                - halfDisplacement;
+
+        var d = ( b * b ) - ( 4 * a * c );
+
+        if (d.IsNegative)
+        {
+          return Result.Error<MotionProfile>( ErrorCode.NegativeTimeResult );
+        }
+
+        constantAccelerationDuration = ( -b + d.SquareRoot() ) / ( 2 * a );
+
+        if (constantAccelerationDuration.IsNegative)
+        {
+          return Result.Error<MotionProfile>( ErrorCode.NegativeTimeResult );
+        }
+
+        constantAccelerationDisplacement = _kinematics.CalculateQuadraticPosition(
+          constantAccelerationDuration,
+          positiveJerkMaxVelocity,
+          positiveJerkMaxAcceleration
+        );
+
+        constantAccelerationMaxVelocity = positiveJerkMaxVelocity
+                                          + _kinematics.CalculateQuadraticVelocity(
+                                            constantAccelerationDuration,
+                                            positiveJerkMaxAcceleration
+                                          );
+
+        negativeJerkMaxVelocity = constantAccelerationMaxVelocity + positiveJerkMaxVelocity;
+        negativeJerkDisplacement = _kinematics.CalculateCubicPosition(
+          jerkDuration,
+          constantAccelerationMaxVelocity,
+          positiveJerkMaxAcceleration,
+          -jerk
+        );
+      }
     }
-
-    var constantVelocityDuration = _kinematics.CalculateLinearTime( constantVelocityDisplacement, maxVelocity );
-
-    if (constantVelocityDuration.IsNegative)
+    else if (totalDisplacement > calculatedTotalDisplacement)
     {
-      return Result.Error<MotionProfile>( ErrorCode.NegativeTimeResult );
+      // If the requested total displacement is larger than the calculated total displacement,
+      // it means that the motion should have constant velocity phase.
+      constantVelocityDisplacement = totalDisplacement - calculatedTotalDisplacement;
+      constantVelocityDuration = _kinematics.CalculateLinearTime(
+        constantVelocityDisplacement,
+        negativeJerkMaxVelocity
+      );
+
+      if (constantAccelerationDuration.IsNegative)
+      {
+        return Result.Error<MotionProfile>( ErrorCode.NegativeTimeResult );
+      }
     }
 
     var timeProfile = new TimeProfile(
@@ -576,17 +601,17 @@ internal class MotionProfileGenerator : IMotionProfileGenerator
     );
 
     var velocityProfile = new VelocityProfile(
-      positiveJerkVelocity,
-      constantAccelerationVelocity,
-      maxVelocity
+      positiveJerkMaxVelocity,
+      constantAccelerationMaxVelocity,
+      negativeJerkMaxVelocity
     );
 
-    var accelerationProfile = new AccelerationProfile( maxAcceleration );
+    var accelerationProfile = new AccelerationProfile( positiveJerkMaxAcceleration );
 
     var motionProfile = new MotionProfile(
       totalDisplacement,
-      maxVelocity,
-      maxAcceleration,
+      negativeJerkMaxVelocity,
+      positiveJerkMaxAcceleration,
       jerk,
       timeProfile,
       displacementProfile,
