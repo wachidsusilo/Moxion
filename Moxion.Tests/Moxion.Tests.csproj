@@ -35,7 +35,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Moxion.Application\Moxion.Application.csproj" />
-      <ProjectReference Include="..\Moxion.CodeAnalysis\Moxion.CodeAnalysis\Moxion.CodeAnalysis.csproj" />
+      <ProjectReference Include="..\Moxion.CodeAnalysis\Moxion.CodeAnalysis.csproj" />
     </ItemGroup>
 
     <ItemGroup>
