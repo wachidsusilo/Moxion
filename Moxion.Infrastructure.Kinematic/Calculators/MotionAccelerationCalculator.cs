@@ -63,6 +63,11 @@ internal class MotionAccelerationCalculator : IMotionAccelerationCalculator
           var phase = param.Profile.CalculatePhase( time );
           var phaseDuration = param.Profile.TimeProfile.CalculateDuration( time, phase );
 
+          if (phase == MotionPhase.None)
+          {
+            return Result.Error<MotionAccelerationCalculationResult>( ErrorCode.InvalidMotionPhase );
+          }
+
           if (phase == MotionPhase.AccelerationWithPositiveJerk)
           {
             accelerationData.Add( _kinematics.CalculateCubicAcceleration( phaseDuration, param.Profile.Jerk ) );

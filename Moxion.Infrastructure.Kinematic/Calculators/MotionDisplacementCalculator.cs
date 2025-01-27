@@ -93,6 +93,11 @@ internal class MotionDisplacementCalculator : IMotionDisplacementCalculator
           var phase = param.Profile.CalculatePhase( time );
           var phaseDuration = param.Profile.TimeProfile.CalculateDuration( time, phase );
 
+          if (phase == MotionPhase.None)
+          {
+            return Result.Error<MotionDisplacementCalculationResult>( ErrorCode.InvalidMotionPhase );
+          }
+
           if (phase == MotionPhase.AccelerationWithPositiveJerk)
           {
             positionData.Add( _kinematics.CalculateCubicPosition( phaseDuration, param.Profile.Jerk ) );

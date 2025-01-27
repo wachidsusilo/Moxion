@@ -15,6 +15,7 @@ public enum ErrorCode
   #region Calculation
 
   NegativeTimeResult,
+  InvalidMotionPhase,
 
   #endregion
 
