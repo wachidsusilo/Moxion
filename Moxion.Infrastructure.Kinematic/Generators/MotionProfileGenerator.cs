@@ -248,7 +248,7 @@ internal class MotionProfileGenerator : IMotionProfileGenerator
     var velocityProfile = new VelocityProfile(
       Velocity.Zero,
       maxVelocity,
-      Velocity.Zero
+      maxVelocity
     );
 
     var accelerationProfile = new AccelerationProfile( Acceleration.Zero );
